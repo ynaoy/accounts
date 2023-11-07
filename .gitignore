@@ -1,0 +1,43 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/nextjs/src/nextjs_accounts/node_modules
+/nextjs/src/nextjs_accounts/.pnp
+/nextjs/src/nextjs_accounts/.pnp.js
+/nextjs/src/nextjs_accounts/.yarn/install-state.gz
+
+# testing
+/nextjs/src/nextjs_accounts/coverage
+
+# next.js
+/nextjs/src/nextjs_accounts/.next/
+/nextjs/src/nextjs_accounts/out/
+
+# production
+/nextjs/src/nextjs_accounts/build
+
+# misc
+/nextjs/src/nextjs_accounts/.DS_Store
+/nextjs/src/nextjs_accounts/*.pem
+
+# debug
+/nextjs/src/nextjs_accounts/npm-debug.log*
+/nextjs/src/nextjs_accounts/yarn-debug.log*
+/nextjs/src/nextjs_accounts/yarn-error.log*
+
+# local env files
+/nextjs/src/nextjs_accounts/.env
+
+# vercel
+/nextjs/src/nextjs_accounts/.vercel
+
+# typescript
+/nextjs/src/nextjs_accounts/*.tsbuildinfo
+/nextjs/src/nextjs_accounts/next-env.d.ts
+
+# django
+*.log
+*.pyc
+**/__pycache__/
+django/src/db/
+django/src/django_accounts/.env
