@@ -45,7 +45,10 @@ INSTALLED_APPS = [
     'corsheaders',
     'rest_framework',
     'rest_framework_simplejwt',
+    'main_app.apps.MainAppConfig', # ユーザー認証
 ]
+
+AUTH_USER_MODEL = "main_app.User" # カスタムユーザーを認証用ユーザーとして登録
 
 MIDDLEWARE = [
     "corsheaders.middleware.CorsMiddleware",
