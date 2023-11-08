@@ -17,15 +17,19 @@ import environ
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
 # .envファイルを読み込む
-env = environ.Env()
-env.read_env(os.path.join(BASE_DIR, '.env'))
+env_by_file = environ.Env()
+env_by_file.read_env(os.path.join(BASE_DIR, '.env')) # .envファイルが存在しなくてもエラーにならない
+
+# .envを含むホストマシン全体の環境変数
+env = os.environ
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = env('SECRET_KEY')
+SECRET_KEY = env.get('SECRET_KEY')
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -91,10 +95,10 @@ DATABASES = {
         #'NAME': BASE_DIR / 'db.sqlite3',
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'mysql',
-        'USER':  env('DB_USER'),
-        'PASSWORD': env('DB_PASSWORD'),
-        'HOST': env('DB_HOST'),
-        'PORT': env('DB_PORT'),
+        'USER':  env.get('DB_USER'),
+        'PASSWORD': env.get('DB_PASSWORD'),
+        'HOST': env.get('DB_HOST'),
+        'PORT': env.get('DB_PORT'),
     }
 }
 
@@ -129,9 +133,11 @@ REST_FRAMEWORK = {
 }
 
 SIMPLE_JWT = {
-    'SIGNING_KEY': env('SECRET_KEY'),
-    'ALGORITHM': env('JWT_ALGORITHM'),
-    'AUTH_HEADER_TYPES': env('JWT_AUTH_HEADER_TYPES').split(),
+    'SIGNING_KEY': env.get('SECRET_KEY'),
+    'ALGORITHM': env.get('JWT_ALGORITHM'),
+    #'AUTH_HEADER_TYPES': env('JWT_AUTH_HEADER_TYPES').split(),
+    'AUTH_HEADER_TYPES': env.get('JWT_AUTH_HEADER_TYPES').split(),
+    #'AUTH_HEADER_TYPES': ["aaa"],
     'ROTATE_REFRESH_TOKENS': True,
     'ACCESS_TOKEN_LIFETIME': datetime.timedelta(minutes=30),
     'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=14),
@@ -150,7 +156,7 @@ USE_TZ = True
 # 自身以外のオリジンのHTTPリクエスト内にクッキーを含めることを許可する
 CORS_ALLOW_CREDENTIALS = True
 # アクセスを許可したいURL（アクセス元）を追加
-CORS_ALLOWED_ORIGINS = env('TRUSTED_ORIGINS').split()
+CORS_ALLOWED_ORIGINS = env.get('TRUSTED_ORIGINS').split()
 # プリフライト(事前リクエスト)の設定、30分だけ許可
 CORS_PREFLIGHT_MAX_AGE = 60 * 30
 
