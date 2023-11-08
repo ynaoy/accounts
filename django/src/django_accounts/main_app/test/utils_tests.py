@@ -6,9 +6,8 @@ from rest_framework import status
 from rest_framework.response import Response
 from django.http import HttpRequest
 from rest_framework.request import Request
+from rest_framework.exceptions import AuthenticationFailed
 import os
-from pathlib import Path
-import environ
 
 # 環境変数を読み込む
 JWT_HEADER = os.environ.get("JWT_AUTH_HEADER_TYPES")
@@ -17,7 +16,7 @@ def create_default_user(username="Test User",
                        email="example@example.com",
                        password="password"):
   """
- パラメータのユーザーを作成する
+ ユーザーを作成する
   """
   user= User.objects.create_user(username=username,
                                  email=email,
@@ -79,10 +78,25 @@ class UserUtilsTests(TestCase):
 
   def test_verify_jwt_with_invalid_jwt(self):
     """
+    無効なjwtがセットされたリクエストを引数にしてverify_jwt(request)を実行すると
+    401エラーが返ってくる
+    """
+    request = Request(HttpRequest())
+    jwt = get_jwt(self.user)
+    # jwtを無効にする
+    jwt["access"] += "invalid"
+
+    request.META["HTTP_AUTHORIZATION"]= JWT_HEADER+" "+jwt["access"]
+    # 認証に失敗すると401エラーが返ってくる
+    with self.assertRaises(AuthenticationFailed):
+      verify_jwt(request)
+
+  def test_verify_jwt_with_not_jwt(self):
+    """
     jwtがセットされていないリクエストを引数にしてverify_jwt(request)を実行すると
     Noneが返ってくる
     """
     request = Request(HttpRequest())
     raw_jwt = verify_jwt(request)
-    # 認証に失敗するとNoneが返ってくる
+    # Noneが返ってくる
     self.assertFalse(raw_jwt)

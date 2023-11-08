@@ -37,6 +37,8 @@ def get_jwt_and_set_cookie(user, response):
 def verify_jwt(request):
     """
     リクエストのヘッダーにあるjwtを使ってユーザー認証する
-    [User,payload]か、Noneを返す
+    jwtが認証成功すれば、[User,payload]
+    jwtが認証失敗したら401エラー
+    jwtがセットされていなければNoneを返す
     """
     return JWTAuthentication().authenticate(request)
