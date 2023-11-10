@@ -1,0 +1,45 @@
+name: ci
+on: push
+jobs:
+  django-test-job:
+    runs-on: ubuntu-latest
+
+    services: # job内で使用するサービス
+      db:
+        image: mysql:8.0
+        ports:
+          - 3306:3306
+        env:
+          MYSQL_ROOT_PASSWORD: password
+        options: >- #mysqlの起動チェック
+          --health-cmd "mysqladmin ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    container: # ここで指定したコンテナ内で作業する
+      image: python:3
+      ports:
+        - 8000:8000
+      env:
+        SECRET_KEY: ${{ secrets.SECRET_KEY }}
+        DB_USER: root
+        DB_PASSWORD: password
+        DB_HOST: db
+        DB_PORT: 3306
+        TRUSTED_ORIGINS: ${{ secrets.TRUSTED_ORIGINS }}
+        JWT_ALGORITHM: ${{ secrets.JWT_ALGORITHM }}
+        JWT_AUTH_HEADER_TYPES: ${{ secrets.JWT_AUTH_HEADER_TYPES }}
+    
+    steps: 
+      - uses: actions/checkout@v4 #レポジトリ内のコードにアクセスできるようにする
+
+      - name: Install dependencies
+        working-directory: ./django/src
+        run:  |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Test django
+        working-directory: ./django/src/django_accounts
+        run: python3 ./manage.py test
