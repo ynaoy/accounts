@@ -12,15 +12,21 @@ class UserSerializer(serializers.ModelSerializer):
             'password': {'write_only': True, 'required':False},
         }
 
-    def create(self, username, email, password):
-        return User.objects.create_user(username=username, 
-                                        email=email, 
-                                        password=password)
+    def create(self, validated_data):
+        """
+        新しいUserインスタンスを作成します。
+        """
+        return User.objects.create_user(**validated_data)
     
-    def update(self, user, fields):
-        return User.objects.update_user(user, fields)
+    def update(self, instance, validated_data):
+        """
+        既存のUserインスタンスを更新します。
+        """
+        instance.update_user(validated_data)
+        return instance
 
-    def is_valid(self, valid_fields=(), raise_exception=False, *args):
+    def is_valid(self, valid_fields=(), **kwargs):
         if valid_fields:
-            self.initial_data = {k:v for k,v in self.initial_data.items() if(k in valid_fields)}
-        return super().is_valid(*args,raise_exception=False)
+            self.initial_data = {k: v for k, v in self.initial_data.items() if(k in valid_fields)}
+        return super().is_valid(**kwargs)
+
