@@ -27,6 +27,6 @@ class UserSerializer(serializers.ModelSerializer):
 
     def is_valid(self, valid_fields=(), **kwargs):
         if valid_fields:
-            self.initial_data = {k: v for k, v in self.initial_data.items() if k in valid_fields}
+            self.initial_data = {k: v for k, v in self.initial_data.items() if(k in valid_fields)}
         return super().is_valid(**kwargs)
 
