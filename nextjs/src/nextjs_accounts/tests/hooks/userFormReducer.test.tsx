@@ -6,7 +6,7 @@ import { act } from "react-dom/test-utils";
 import { useReducer } from "react";
 import { initialState, userFormReducer } from "../../hooks/userFormReducer";
 
-describe("userReducer", ()=>{
+describe("userFormReducer", ()=>{
   
   test("Reducerの生成と初期値のテスト", () => {
     const { result } = renderHook(() => useReducer(userFormReducer, initialState));
