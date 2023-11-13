@@ -1,10 +1,18 @@
 import {fetchLoginFlgReturn,fetchParams} from './types/apiHelper.d'
+import { getCookie } from 'cookies-next';
 
 export const fetchResponseFromApi = async(
   url:string, 
   params:fetchParams, 
   data: Record<string, unknown> = {}
 ) =>{
+
+  // クッキーを取得
+  const auth = getCookie('Authorization'); // 存在しなければundefined
+  if(auth!=undefined){
+    params.headers['Authorization'] = auth
+  }
+  
   // Json形式でリクエストをする
   params.headers['Content-Type'] = 'application/json';
 
