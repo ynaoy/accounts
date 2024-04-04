@@ -11,7 +11,7 @@ jobs:
           - 3306:3306
         env:
           MYSQL_ROOT_PASSWORD: password
-        options: >- #mysqlの起動チェック
+        options: >- # mysqlの起動チェック
           --health-cmd "mysqladmin ping"
           --health-interval 10s
           --health-timeout 5s
@@ -23,8 +23,8 @@ jobs:
         - 8000:8000
       env:
         SECRET_KEY: ${{ secrets.SECRET_KEY }}
-        DB_USER: root
-        DB_PASSWORD: password
+        DB_USER: ${{ secrets.DB_USER }}
+        DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         DB_HOST: db
         DB_PORT: 3306
         TRUSTED_ORIGINS: ${{ secrets.TRUSTED_ORIGINS }}
@@ -43,3 +43,24 @@ jobs:
       - name: Test django
         working-directory: ./django/src/django_accounts
         run: python3 ./manage.py test
+
+  nextjs-test-job:
+    runs-on: ubuntu-latest
+
+    container: # ここで指定したコンテナ内で作業する
+      image: node:21-alpine
+      ports:
+        - 3000:3000
+      env:
+        NEXT_PUBLIC_API_ORIGIN: ${{ secrets.NEXT_PUBLIC_API_ORIGIN }}
+    
+    steps: 
+      - uses: actions/checkout@v4 #レポジトリ内のコードにアクセスできるようにする
+
+      - name: Install dependencies
+        working-directory: ./nextjs/src/nextjs_accounts
+        run: yarn install
+
+      - name: Test nextjs
+        working-directory: ./nextjs/src/nextjs_accounts
+        run: yarn test
