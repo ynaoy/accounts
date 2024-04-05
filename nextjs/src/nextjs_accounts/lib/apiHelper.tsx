@@ -1,9 +1,9 @@
-import {fetchLoginFlgReturn,fetchParams} from './types/apiHelper.d'
+import { fetchLoginFlgReturnType, fetchParamsType } from './types/apiHelper.d'
 import { getCookie } from 'cookies-next';
 
 export const fetchResponseFromApi = async(
   url:string, 
-  params:fetchParams, 
+  params:fetchParamsType, 
   data: Record<string, unknown> = {}
 ) =>{
 
@@ -25,7 +25,7 @@ export const fetchResponseFromApi = async(
   return response
 }
 
-export const fetchLoginFlg:fetchLoginFlgReturn =async()=>{
+export const fetchLoginFlg:fetchLoginFlgReturnType =async()=>{
   /**
    * @return {boolean} - ログイン状態を返す
    */

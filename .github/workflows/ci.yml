@@ -10,7 +10,7 @@ jobs:
         ports:
           - 3306:3306
         env:
-          MYSQL_ROOT_PASSWORD: password
+          MYSQL_ROOT_PASSWORD: ${{ secrets.DB_PASSWORD }}
         options: >- # mysqlの起動チェック
           --health-cmd "mysqladmin ping"
           --health-interval 10s
