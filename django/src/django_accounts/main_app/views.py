@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from .serializer import UserSerializer
 from .models import User
 from .utils import get_jwt_and_set_cookie, verify_jwt
+from django.db import IntegrityError
 
 class IsLoginView(RetrieveAPIView):
   """
@@ -34,13 +35,27 @@ class SignupView(CreateAPIView):
   valid_fields = ("username", "email", "password")
 
   def post(self, request, format=None, *args, **kwargs):
-    serializer = self.serializer_class(data=request.data)
-    if serializer.is_valid(valid_fields=self.valid_fields):
-        user = serializer.save()  # UserSerializerのcreateメソッドを呼び出す
+    try:
+      serializer = self.serializer_class(data=request.data)
+      # バリデーションチェック
+      if serializer.is_valid(valid_fields=self.valid_fields):
+        # ユーザー作成
+        try:
+          user = serializer.save()  # UserSerializerのcreateメソッドを呼び出す
+        except IntegrityError as e:
+          # ユーザー作成時に一意性制約違反などのデータベースエラーが発生した場合
+          return Response({'error': str(e)}, status=status.HTTP_409_CONFLICT)
 
         # JWTを発行してクッキーにセットする。そのレスポンスを返す
         response = Response(serializer.validated_data, status=status.HTTP_201_CREATED)
         response = get_jwt_and_set_cookie(user, response)
         return response
-
-    return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+      
+      # バリデーションエラーの場合
+      else: 
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    # その他の予期せぬエラーが発生した場合
+    except Exception as e:
+      return Response({'error': '予期せぬエラーが発生しました。'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    

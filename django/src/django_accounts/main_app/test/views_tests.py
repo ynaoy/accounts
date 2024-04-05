@@ -123,3 +123,49 @@ class SignupViewTests(TestCase):
     # クッキーにアクセストークンとリフレッシュトークンが存在しない
     self.assertFalse("Authorization" in response.cookies)
     self.assertFalse("refresh" in response.cookies)
+
+  def test_signup_view_post_with_duplicated_username(self):
+    """
+    signup_viewに重複したusernameでPOSTメソッドを送ったときにユーザーが追加されない、ログインされない
+    """
+    # ユーザーを作成
+    create_default_user(
+      username="Test User",
+      email="original@example.com",
+      password="password")
+
+    post_data = { "username":"Test User",
+                  "email":"duplicated@example.com",
+                  "password":"password"}
+    response = self.client.post(self.signup_url,
+                                post_data,
+                                content_type=self.content_type)
+
+    # 409エラーが返ってくる
+    self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+    # クッキーにアクセストークンとリフレッシュトークンが存在しない
+    self.assertFalse("Authorization" in response.cookies)
+    self.assertFalse("refresh" in response.cookies)
+
+  def test_signup_view_post_with_duplicated_email(self):
+    """
+    signup_viewに重複したemailでPOSTメソッドを送ったときにユーザーが追加されない、ログインされない
+    """
+    # ユーザーを作成
+    create_default_user(
+      username="Test User",
+      email="example@example.com",
+      password="password")
+
+    post_data = { "username":"Duplicated User",
+                  "email":"example@example.com",
+                  "password":"password"}
+    response = self.client.post(self.signup_url,
+                                post_data,
+                                content_type=self.content_type)
+
+    # 409エラーが返ってくる
+    self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+    # クッキーにアクセストークンとリフレッシュトークンが存在しない
+    self.assertFalse("Authorization" in response.cookies)
+    self.assertFalse("refresh" in response.cookies)
