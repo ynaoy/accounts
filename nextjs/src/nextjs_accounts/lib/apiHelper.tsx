@@ -1,4 +1,5 @@
-import { fetchLoginFlgReturnType, fetchParamsType } from './types/apiHelper.d'
+import {  fetchLoginFlgReturnType, fetchParamsType, 
+          postToSignupApiParamsType, postToSignupApiReturnType } from './types/apiHelper.d'
 import { getCookie } from 'cookies-next';
 
 export const fetchResponseFromApi = async(
@@ -32,12 +33,38 @@ export const fetchLoginFlg:fetchLoginFlgReturnType =async()=>{
 
   // APIにリクエストを送る
   try{
-    const response = await fetchResponseFromApi(`${process.env.NEXT_PUBLIC_API_ORIGIN}/api/is_login`,
-    { method:'GET',
-      headers: {},
-      credentials: 'include',
-    })
+    const response = await fetchResponseFromApi(
+      `${process.env.NEXT_PUBLIC_API_ORIGIN}/api/is_login`,
+      { method:'GET',
+        headers: {},
+        credentials: 'include',
+      }
+    )
     return response.json()
+  
+  } catch(error) {
+    console.error(error);
+    return {loginFlg: false}
+  }
+}
+
+export const postToSignupApi:postToSignupApiReturnType =async(data: postToSignupApiParamsType)=>{
+  /**
+   * @return {boolean} - ログイン状態を返す
+   */
+
+  // APIにリクエストを送る
+  try{
+    const response = await fetchResponseFromApi(
+      `${process.env.NEXT_PUBLIC_API_ORIGIN}/api/signup`,
+      { method:'POST',
+        headers: {},
+        credentials: 'include',
+      },
+      data
+    )
+    console.log(response.json())
+    return {loginFlg: true}
   
   } catch(error) {
     console.error(error);
