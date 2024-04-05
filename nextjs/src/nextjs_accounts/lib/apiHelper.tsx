@@ -63,11 +63,20 @@ export const postToSignupApi:postToSignupApiReturnType =async(data: postToSignup
       },
       data
     )
-    console.log(response)
-    return {loginFlg: true}
+    if(!response.ok){
+      console.error(`Error! status: ${response.status}, statusText: ${response.statusText}`)
+      let ret = await response.json()
+      console.log(ret)
+      return {loginFlg: false}
+    }
+    else{
+      let ret = await response.json()
+      console.log(ret)
+      return {loginFlg: true}
+    }
   
   } catch(error) {
-    console.error(error);
+    console.error('Fetching data failed:', error);
     return {loginFlg: false}
   }
 }

@@ -12,7 +12,15 @@ jest.mock('../../hooks/LoginFlgContext',
       }));
 
 //APIと通信するモジュールのモック
-let postToSignupApiMock = jest.fn(()=>{ return{ loginFlg:!loginFlgMock }})
+let httpStatus = "201"
+let statusText = "success"
+let data = {username:"user", email:"example@example.com", password:"password"}
+let postToSignupApiMock = jest.fn(()=>{ return{ 
+  httpStatus: httpStatus,
+  statusText: statusText,
+  data: data
+ }})
+ 
 jest.mock('../../lib/apiHelper',
   ()=>({...jest.requireActual('../../lib/apiHelper'),
         postToSignupApi : async(data:postToSignupApiParamsType)=>postToSignupApiMock(), 

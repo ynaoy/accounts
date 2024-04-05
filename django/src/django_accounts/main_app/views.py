@@ -42,5 +42,5 @@ class SignupView(CreateAPIView):
         response = Response(serializer.validated_data, status=status.HTTP_201_CREATED)
         response = get_jwt_and_set_cookie(user, response)
         return response
-        
+
     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
