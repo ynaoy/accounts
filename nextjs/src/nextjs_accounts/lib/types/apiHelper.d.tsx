@@ -7,7 +7,7 @@ export type fetchParamsType = {
 export type fetchLoginFlgReturnType = ()=>Promise<{loginFlg:boolean}>
 
 export type postToSignupApiParamsType = {
-  userName: string;
+  username: string;
   email: string;
   password: string;
 }

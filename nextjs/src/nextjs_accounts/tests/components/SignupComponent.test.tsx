@@ -8,22 +8,24 @@ let setLoginFlgMock = jest.fn(()=>{ loginFlgMock=!loginFlgMock })
 jest.mock('../../hooks/LoginFlgContext',
   ()=>({...jest.requireActual('../../hooks/LoginFlgContext'),
         useLoginFlgContext : ()=>loginFlgMock,
-        useSetLoginFlgContext : ()=>setLoginFlgMock 
+        useSetLoginFlgContext : ()=>setLoginFlgMock
       }));
+
 //APIと通信するモジュールのモック
 let postToSignupApiMock = jest.fn(()=>{ return{ loginFlg:!loginFlgMock }})
 jest.mock('../../lib/apiHelper',
   ()=>({...jest.requireActual('../../lib/apiHelper'),
-        postToSignupApi : (params:postToSignupApiParamsType)=>loginFlgMock, 
+        postToSignupApi : async(data:postToSignupApiParamsType)=>postToSignupApiMock(), 
       }));
 
 describe('SignupComponent', ()=>{
   afterEach(() => {
     setLoginFlgMock.mockClear()
+    postToSignupApiMock.mockClear()
     loginFlgMock = false
   });
 
-  test('サブミットボタンをクリックした時にApiと通信し、ログイン状態が変更される', () => {
+  test('サブミットボタンをクリックした時にApiと通信し、ログイン状態が変更される', async() => {
     //レンダー
     render(<SignupComponent/>);
 
@@ -32,7 +34,7 @@ describe('SignupComponent', ()=>{
     expect(button).toBeTruthy()
 
     //サブミットボタンをクリック
-    fireEvent.click(button)
+    await fireEvent.click(button)
     
     //postToSignupApi(params)が呼び出されている
     expect(postToSignupApiMock).toHaveBeenCalled()

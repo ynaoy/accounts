@@ -1,6 +1,7 @@
 import { useReducer } from 'react';
 import { useLoginFlgContext, useSetLoginFlgContext } from '../hooks/LoginFlgContext';
 import { initialState, userFormReducer } from '../hooks/userFormReducer';
+import { postToSignupApi } from '../lib/apiHelper';
 import Form from './forms/Form';
 import FormItem from './forms/FormItem';
 
@@ -10,11 +11,17 @@ export default function SignupComponent(){
   const setLoginFlg = useSetLoginFlgContext()
 
   // フォームの状態を管理する関数
-  const [, dispatch] = useReducer(userFormReducer, initialState)
+  const [formState, dispatch] = useReducer(userFormReducer, initialState)
 
-  const handleSignup = () => {
+  const handleSignup = async() => {
     // ユーザー登録ボタンがクリックされた時の処理
-    setLoginFlg(() => !loginFlg);
+    console.log(formState)
+    let {loginFlg} = await postToSignupApi(
+      { 'username': formState['userName'], // バックエンドではparamsのキーがuser"N"ameではなくuser"n"ame
+        'email': formState['email'],
+        'password': formState['password'],
+      })
+    setLoginFlg(() => loginFlg);
   };
 
   return (
@@ -30,7 +37,7 @@ export default function SignupComponent(){
             <Form onClick={()=>handleSignup()}
                   buttonText = "登録">
               <FormItem onChange={(e)=>dispatch({type: 'edited_userName',userName: e.target.value})} 
-                id="userName" type="text" labelText="ユーザーネーム"/>
+                id="username" type="text" labelText="ユーザーネーム"/>
               <FormItem onChange={(e)=>dispatch({type: 'edited_email',email: e.target.value})} 
                 id="email" type="email" labelText="メールアドレス"/>
               <FormItem onChange={(e)=>dispatch({type: 'edited_password',password: e.target.value})} 

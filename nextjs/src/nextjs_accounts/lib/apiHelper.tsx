@@ -56,14 +56,14 @@ export const postToSignupApi:postToSignupApiReturnType =async(data: postToSignup
   // APIにリクエストを送る
   try{
     const response = await fetchResponseFromApi(
-      `${process.env.NEXT_PUBLIC_API_ORIGIN}/api/signup`,
+      `${process.env.NEXT_PUBLIC_API_ORIGIN}/api/signup/`,
       { method:'POST',
         headers: {},
         credentials: 'include',
       },
       data
     )
-    console.log(response.json())
+    console.log(response)
     return {loginFlg: true}
   
   } catch(error) {
