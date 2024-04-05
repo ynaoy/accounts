@@ -12,7 +12,7 @@ jest.mock('../../hooks/LoginFlgContext',
       }));
 
 //APIと通信するモジュールのモック
-let httpStatus = "201"
+let httpStatus = 201
 let statusText = "success"
 let data = {username:"user", email:"example@example.com", password:"password"}
 let postToSignupApiMock = jest.fn(()=>{ return{ 
@@ -20,7 +20,7 @@ let postToSignupApiMock = jest.fn(()=>{ return{
   statusText: statusText,
   data: data
  }})
- 
+
 jest.mock('../../lib/apiHelper',
   ()=>({...jest.requireActual('../../lib/apiHelper'),
         postToSignupApi : async(data:postToSignupApiParamsType)=>postToSignupApiMock(), 
@@ -31,6 +31,9 @@ describe('SignupComponent', ()=>{
     setLoginFlgMock.mockClear()
     postToSignupApiMock.mockClear()
     loginFlgMock = false
+    httpStatus = 201
+    statusText = "success"
+    data = {username:"user", email:"example@example.com", password:"password"}
   });
 
   test('サブミットボタンをクリックした時にApiと通信し、ログイン状態が変更される', async() => {

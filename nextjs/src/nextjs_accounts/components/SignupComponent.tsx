@@ -14,14 +14,29 @@ export default function SignupComponent(){
   const [formState, dispatch] = useReducer(userFormReducer, initialState)
 
   const handleSignup = async() => {
-    // ユーザー登録ボタンがクリックされた時の処理
-    console.log(formState)
-    let {loginFlg} = await postToSignupApi(
+    /**
+     * ユーザー登録ボタンがクリックされた時の処理
+    **/
+    // バックエンドApiにフォームをPOSTしてレスポンスを受け取る
+    let {httpStatus, statusText, data} = await postToSignupApi(
       { 'username': formState['userName'], // バックエンドではparamsのキーがuser"N"ameではなくuser"n"ame
         'email': formState['email'],
         'password': formState['password'],
       })
-    setLoginFlg(() => loginFlg);
+    // 無事ユーザーが作成された時
+    if(httpStatus == 201){
+      setLoginFlg(() => true);
+    }
+    // バリデーションが通らなかった時
+    else if(data['message']==undefined){
+      console.log(`httpStatus: ${httpStatus}, statusText: ${statusText}, data: ${data}`)
+      //未実装
+    }
+    // 予期せぬエラーの時
+    else{
+      console.log(`httpStatus: ${httpStatus}, statusText: ${statusText}, data: ${data}`)
+      //未実装
+    }
   };
 
   return (

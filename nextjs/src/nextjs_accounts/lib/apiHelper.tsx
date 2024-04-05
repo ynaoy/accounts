@@ -50,7 +50,7 @@ export const fetchLoginFlg:fetchLoginFlgReturnType =async()=>{
 
 export const postToSignupApi:postToSignupApiReturnType =async(data: postToSignupApiParamsType)=>{
   /**
-   * @return {boolean} - ログイン状態を返す
+   * @return {httpStatus: number, statusText: string, data: {[key:string]: sting}}
    */
 
   // APIにリクエストを送る
@@ -63,20 +63,22 @@ export const postToSignupApi:postToSignupApiReturnType =async(data: postToSignup
       },
       data
     )
-    if(!response.ok){
-      console.error(`Error! status: ${response.status}, statusText: ${response.statusText}`)
-      let ret = await response.json()
-      console.log(ret)
-      return {loginFlg: false}
-    }
-    else{
-      let ret = await response.json()
-      console.log(ret)
-      return {loginFlg: true}
+
+    let ret = await response.json()
+    console.log(ret)
+    return {
+      httpStatus: response.status,
+      statusText: response.statusText,
+      data: ret
     }
   
   } catch(error) {
-    console.error('Fetching data failed:', error);
-    return {loginFlg: false}
+    console.error('Undefind Error:', error);
+    return { 
+      // 汎用的なエラーレスポンスを返す
+      httpStatus: 500,
+      statusText: 'Internal Server Error',
+      data: { message: '予期せぬエラーが発生しました' },
+    };
   }
 }
