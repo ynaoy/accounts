@@ -23,16 +23,21 @@ export default function SignupComponent(){
         'email': formState['email'],
         'password': formState['password'],
       })
-    // 無事ユーザーが作成された時
+    // 無事ユーザーが作成された場合
     if(httpStatus == 201){
       setLoginFlg(() => true);
     }
-    // バリデーションが通らなかった時
-    else if(data['message']==undefined){
+    // バリデーションが通らなかった場合
+    else if(httpStatus == 400){
       console.log(`httpStatus: ${httpStatus}, statusText: ${statusText}, data: ${data}`)
       //未実装
     }
-    // 予期せぬエラーの時
+    // 重複するuserNameかemailのユーザーが存在する場合
+    else if(httpStatus == 409){
+      console.log(`httpStatus: ${httpStatus}, statusText: ${statusText}, data: ${data}`)
+      //未実装
+    }
+    // 予期せぬエラーの場合
     else{
       console.log(`httpStatus: ${httpStatus}, statusText: ${statusText}, data: ${data}`)
       //未実装
