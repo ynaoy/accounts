@@ -6,7 +6,7 @@ export const initialState:UserState = {
   password:"",
 };
 
-export function userFormReducer(state:UserState, action:UserAction) {
+export function useFormReducer(state:UserState, action:UserAction) {
   switch (action.type) {
     case "edited_userName": {
       return {

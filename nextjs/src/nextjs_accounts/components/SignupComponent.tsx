@@ -1,6 +1,6 @@
 import { useReducer } from 'react';
 import { useLoginFlgContext, useSetLoginFlgContext } from '../hooks/LoginFlgContext';
-import { initialState, userFormReducer } from '../hooks/userFormReducer';
+import { initialState, useFormReducer } from '../hooks/useFormReducer';
 import { postToSignupApi } from '../lib/apiHelper';
 import Form from './forms/Form';
 import FormItem from './forms/FormItem';
@@ -11,7 +11,7 @@ export default function SignupComponent(){
   const setLoginFlg = useSetLoginFlgContext()
 
   // フォームの状態を管理する関数
-  const [formState, dispatch] = useReducer(userFormReducer, initialState)
+  const [formState, dispatch] = useReducer(useFormReducer, initialState)
 
   const handleSignup = async() => {
     /**

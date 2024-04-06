@@ -4,12 +4,12 @@
 import { renderHook} from "@testing-library/react";
 import { act } from "react-dom/test-utils";
 import { useReducer } from "react";
-import { initialState, userFormReducer } from "../../hooks/userFormReducer";
+import { initialState, useFormReducer } from "../../hooks/useFormReducer";
 
 describe("userFormReducer", ()=>{
   
   test("Reducerの生成と初期値のテスト", () => {
-    const { result } = renderHook(() => useReducer(userFormReducer, initialState));
+    const { result } = renderHook(() => useReducer(useFormReducer, initialState));
     
     // stateとdispatchの取得
     const [state] = result.current;
@@ -20,7 +20,7 @@ describe("userFormReducer", ()=>{
 
   test("UserNameの更新のテスト", () => {
     let userName="Edited UserName"
-    const { result } = renderHook(() => useReducer(userFormReducer, initialState))
+    const { result } = renderHook(() => useReducer(useFormReducer, initialState))
 
     //dispatchの取得
     const [, dispatch] = result.current;
@@ -39,7 +39,7 @@ describe("userFormReducer", ()=>{
 
   test("Emailの更新のテスト", () => {
     let email="Edited Email"
-    const { result } = renderHook(() => useReducer(userFormReducer, initialState))
+    const { result } = renderHook(() => useReducer(useFormReducer, initialState))
 
     //dispatchの取得
     const [, dispatch] = result.current
@@ -58,7 +58,7 @@ describe("userFormReducer", ()=>{
 
   test("Passwordの更新のテスト", () => {
     let password="Edited Password"
-    const { result } = renderHook(() => useReducer(userFormReducer, initialState))
+    const { result } = renderHook(() => useReducer(useFormReducer, initialState))
 
     //dispatchの取得
     const [, dispatch] = result.current
@@ -79,7 +79,7 @@ describe("userFormReducer", ()=>{
       userName:"userName",
       email:"email",
       password:"password"}
-    const { result } = renderHook(() => useReducer(userFormReducer,  resetstate))
+    const { result } = renderHook(() => useReducer(useFormReducer,  resetstate))
 
     //dispatchの取得
     const [, dispatch] = result.current
