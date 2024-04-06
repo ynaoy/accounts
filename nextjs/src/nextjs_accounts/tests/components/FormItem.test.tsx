@@ -19,9 +19,12 @@ describe("FormItem", ()=>{
     //レンダー
     render(<FormItem onChange={onChangeMock} id="test" type="text" labelText="テスト" />);
     
+    //ユーザーイベントの初期化
+    const user = userEvent.setup();
+    
     //フォームに値を入力
     const form = screen.getByRole('textbox')
-    await userEvent.type(form, "テストインパット");
+    await user.type(form, "テストインパット");
     
     //フォームに値が入力されている
     expect(form.value).toBe("テストインパット")

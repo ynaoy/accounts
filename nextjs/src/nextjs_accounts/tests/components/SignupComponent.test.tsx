@@ -1,4 +1,8 @@
-import { render, screen, fireEvent} from '@testing-library/react';
+/**
+ * @jest-environment jsdom
+ */
+import { render, screen } from '@testing-library/react';
+import userEvent from "@testing-library/user-event";
 import SignupComponent from '../../components/SignupComponent'
 import { postToSignupApiParamsType } from '../../lib/types/apiHelper.d'
 
@@ -36,21 +40,69 @@ describe('SignupComponent', ()=>{
     data = {username:"user", email:"example@example.com", password:"password"}
   });
 
-  test('サブミットボタンをクリックした時にApiと通信し、ログイン状態が変更される', async() => {
+  test(`フォームにバリデーションが通る入力をして、
+        サブミットボタンをクリックした時にApiと通信し、ログイン状態が変更される`, async() => {
     //レンダー
     render(<SignupComponent/>);
+
+    //ユーザーイベントの初期化
+    const user = userEvent.setup();
+
+    //フォームの要素を取得
+    const userNameInput = screen.getByLabelText('ユーザーネーム')
+    const emailInput = screen.getByLabelText('メールアドレス')
+    const passwordInput = screen.getByLabelText('パスワード')
+    //フォームにバリデーションが通る値を入力
+    await userEvent.type(userNameInput, "Test User");
+    await userEvent.type(emailInput, "example@example.com");
+    await userEvent.type(passwordInput, "password");
+
+    //フォームに値が入力されていることを確認
+    expect(userNameInput.value).toBe("Test User")
+    expect(emailInput.value).toBe("example@example.com")
+    expect(passwordInput.value).toBe("password")
 
     //サブミットボタンが存在する
     const button = screen.getByRole('button', {name: '登録'})
     expect(button).toBeTruthy()
 
     //サブミットボタンをクリック
-    await fireEvent.click(button)
+    await user.click(button)
     
-    //postToSignupApi(params)が呼び出されている
+    //APIと通信する関数が呼び出されている
     expect(postToSignupApiMock).toHaveBeenCalled()
-    //setloginFlg(value)が呼び出されている
+    //ログイン状態を変更する関数が呼び出されている
     expect(setLoginFlgMock).toHaveBeenCalled()
   });
 
+  test(`フォームにバリデーションが通らない入力をして、
+        サブミットボタンをクリックした時にApiと通信されず、ログイン状態が変更されない`, async() => {
+    //レンダー
+    render(<SignupComponent/>);
+  
+    //ユーザーイベントの初期化
+    const user = userEvent.setup();
+  
+    //フォームの要素を取得
+    const userNameInput = screen.getByLabelText('ユーザーネーム')
+    const emailInput = screen.getByLabelText('メールアドレス')
+    const passwordInput = screen.getByLabelText('パスワード')
+
+    //フォームの入力が空白であることを確認
+    expect(userNameInput.value).toBe("")
+    expect(emailInput.value).toBe("")
+    expect(passwordInput.value).toBe("")
+
+    //サブミットボタンが存在する
+    const button = screen.getByRole('button', {name: '登録'})
+    expect(button).toBeTruthy()
+
+    //サブミットボタンをクリック
+    await user.click(button)
+    
+    //バリデーションが通らずにAPIと通信する関数が呼び出されていない
+    expect(postToSignupApiMock).not.toHaveBeenCalled()
+    //ログイン状態を変更する関数が呼び出されていない
+    expect(setLoginFlgMock).not.toHaveBeenCalled()
+  });
 })
