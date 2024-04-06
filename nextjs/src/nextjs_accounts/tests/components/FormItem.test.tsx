@@ -23,7 +23,7 @@ describe("FormItem", ()=>{
     const user = userEvent.setup();
     
     //フォームに値を入力
-    const form = screen.getByRole('textbox')
+    const form:HTMLInputElement = screen.getByRole('textbox') //通常getByRoleではHTMLElement型を受け取るがここではinputノードを扱うため型を指定
     await user.type(form, "テストインパット");
     
     //フォームに値が入力されている

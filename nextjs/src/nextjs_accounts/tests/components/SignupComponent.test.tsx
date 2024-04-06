@@ -49,9 +49,9 @@ describe('SignupComponent', ()=>{
     const user = userEvent.setup();
 
     //フォームの要素を取得
-    const userNameInput = screen.getByLabelText('ユーザーネーム')
-    const emailInput = screen.getByLabelText('メールアドレス')
-    const passwordInput = screen.getByLabelText('パスワード')
+    const userNameInput:HTMLInputElement = screen.getByLabelText('ユーザーネーム')
+    const emailInput:HTMLInputElement = screen.getByLabelText('メールアドレス')
+    const passwordInput:HTMLInputElement = screen.getByLabelText('パスワード')
     //フォームにバリデーションが通る値を入力
     await userEvent.type(userNameInput, "Test User");
     await userEvent.type(emailInput, "example@example.com");
@@ -84,9 +84,9 @@ describe('SignupComponent', ()=>{
     const user = userEvent.setup();
   
     //フォームの要素を取得
-    const userNameInput = screen.getByLabelText('ユーザーネーム')
-    const emailInput = screen.getByLabelText('メールアドレス')
-    const passwordInput = screen.getByLabelText('パスワード')
+    const userNameInput:HTMLInputElement = screen.getByLabelText('ユーザーネーム')//通常getByRoleではHTMLElement型を受け取るがここではinputノードを扱うため型を指定
+    const emailInput:HTMLInputElement = screen.getByLabelText('メールアドレス')
+    const passwordInput:HTMLInputElement = screen.getByLabelText('パスワード')
 
     //フォームの入力が空白であることを確認
     expect(userNameInput.value).toBe("")
