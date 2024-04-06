@@ -1,6 +1,6 @@
 import { FormItemProps } from "./types/Form.d"
 
-export default function Form({onChange, id, labelText, type="text", }: FormItemProps){
+export default function FormItem({onChange, id, labelText, type="text", }: FormItemProps){
   return (
     <div>
       <label htmlFor={id} className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">

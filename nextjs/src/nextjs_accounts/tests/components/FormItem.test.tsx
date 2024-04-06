@@ -15,7 +15,7 @@ describe("FormItem", ()=>{
     expect(screen.getByRole("textbox")).toBeTruthy()
   });
 
-  test('フォームのに入力があった時にonChangeが呼び出される',async()=>{
+  test('フォームに入力があった時にonChangeが呼び出される',async()=>{
     //レンダー
     render(<FormItem onChange={onChangeMock} id="test" type="text" labelText="テスト" ></FormItem>);
     
