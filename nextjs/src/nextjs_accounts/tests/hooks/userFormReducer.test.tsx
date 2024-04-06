@@ -12,7 +12,7 @@ describe("userFormReducer", ()=>{
     const { result } = renderHook(() => useReducer(useFormReducer, initialState));
     
     // stateとdispatchの取得
-    const [state] = result.current;
+    const [state, dispatch] = result.current;
     
     //初期値の確認
     expect(state).toEqual(initialState);
