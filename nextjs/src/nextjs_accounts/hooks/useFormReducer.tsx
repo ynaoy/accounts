@@ -1,12 +1,12 @@
-import { UserState ,UserAction } from "./types/useFormReducer";
+import { UserStateType ,UserActionType } from "./types/useFormReducer";
 
-export const initialState:UserState = {
+export const initialState:UserStateType = {
   userName: "",
   email: "",
   password:"",
 };
 
-export function useFormReducer(state:UserState, action:UserAction) {
+export function useFormReducer(state:UserStateType, action:UserActionType) {
   switch (action.type) {
     case "edited_userName": {
       return {

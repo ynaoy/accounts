@@ -1,10 +1,10 @@
-export type UserState = {
+export type UserStateType = {
   userName: string;
   email: string;
   password: string;
 }
 
-export type UserAction =
+export type UserActionType =
   | { type: 'edited_userName'; userName: string }
   | { type: 'edited_email'; email: string }
   | { type: 'edited_password'; password: string }
