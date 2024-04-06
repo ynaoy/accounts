@@ -6,7 +6,7 @@ const onChangeMock = jest.fn()
 describe("FormItem", ()=>{
   test("フォームが存在するかテスト", () => {
     //レンダー
-    render(<FormItem onChange={onChangeMock} id="test" type="text" labelText="テスト" ></FormItem>);
+    render(<FormItem onChange={onChangeMock} id="test" type="text" labelText="テスト" />);
 
     //labelTextが表示されている
     expect(screen.getByLabelText("テスト")).toBeTruthy()
@@ -15,9 +15,9 @@ describe("FormItem", ()=>{
     expect(screen.getByRole("textbox")).toBeTruthy()
   });
 
-  test('フォームに入力があった時にonChangeが呼び出される',async()=>{
+  test('フォームに入力があった場合にonChangeが呼び出される',async()=>{
     //レンダー
-    render(<FormItem onChange={onChangeMock} id="test" type="text" labelText="テスト" ></FormItem>);
+    render(<FormItem onChange={onChangeMock} id="test" type="text" labelText="テスト" />);
     
     //フォームに値を入力
     const form = screen.getByRole('textbox')
@@ -28,5 +28,12 @@ describe("FormItem", ()=>{
     
     //onChangeイベントが発火している
     expect(onChangeMock).toHaveBeenCalled()
+  })
+
+  test('エラーメッセージが空でない場合に表示されている',async()=>{
+    //レンダー
+    render(<FormItem onChange={onChangeMock} id="test" type="text" labelText="テスト" errorMessage="入力が不正です" />)
+    //エラーメッセージが表示されている
+    expect(screen.getByText("入力が不正です")).toBeTruthy()
   })
 })

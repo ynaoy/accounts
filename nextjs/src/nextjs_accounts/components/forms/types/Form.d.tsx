@@ -9,4 +9,5 @@ export type FormItemProps = {
   onChange?: (event:React.ChangeEvent<HTMLInputElement>)=>void,
   id: string,
   labelText:string, 
-  type?:string }
+  type?:string,
+  errorMessage?:string }
