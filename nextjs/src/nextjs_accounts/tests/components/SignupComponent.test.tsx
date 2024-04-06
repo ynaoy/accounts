@@ -84,7 +84,7 @@ describe('SignupComponent', ()=>{
     const user = userEvent.setup();
   
     //フォームの要素を取得
-    const userNameInput:HTMLInputElement = screen.getByLabelText('ユーザーネーム')//通常getByRoleではHTMLElement型を受け取るがここではinputノードを扱うため型を指定
+    const userNameInput:HTMLInputElement = screen.getByLabelText('ユーザーネーム')//通常getByLabelTextではHTMLElement型を受け取るがここではinputノードを扱うため型を指定
     const emailInput:HTMLInputElement = screen.getByLabelText('メールアドレス')
     const passwordInput:HTMLInputElement = screen.getByLabelText('パスワード')
 
