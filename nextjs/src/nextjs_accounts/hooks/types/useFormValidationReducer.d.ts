@@ -1,3 +1,5 @@
+import { setLoginFlgType } from "./useLoginFlg";
+
 export type ValidationStateType = {
   userName: string;
   email: string;
@@ -5,5 +7,5 @@ export type ValidationStateType = {
 }
 
 export type ValidationActionType = {
-  type: 'check_validation', formState: ValidationStateType //formStateとValidationStateを管理する変数は別だけど型は同じ
+  type: 'update_state', userName: string, email: string, password: string,
 }
