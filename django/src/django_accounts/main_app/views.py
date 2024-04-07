@@ -6,7 +6,6 @@ from rest_framework.response import Response
 from .serializer import UserSerializer
 from .models import User
 from .utils import get_jwt_and_set_cookie, verify_jwt
-from django.db import IntegrityError
 
 class IsLoginView(RetrieveAPIView):
   """
@@ -40,11 +39,7 @@ class SignupView(CreateAPIView):
       # バリデーションチェック
       if serializer.is_valid(valid_fields=self.valid_fields):
         # ユーザー作成
-        try:
-          user = serializer.save()  # UserSerializerのcreateメソッドを呼び出す
-        except IntegrityError as e:
-          # ユーザー作成時に一意性制約違反などのデータベースエラーが発生した場合
-          return Response({'error': str(e)}, status=status.HTTP_409_CONFLICT)
+        user = serializer.save()  # UserSerializerのcreateメソッドを呼び出す
 
         # JWTを発行してクッキーにセットする。そのレスポンスを返す
         response = Response(serializer.validated_data, status=status.HTTP_201_CREATED)
@@ -53,7 +48,11 @@ class SignupView(CreateAPIView):
       
       # バリデーションエラーの場合
       else: 
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # 二次元配列を一次元にして、バリデーションに引っかかった理由を抽出してるだけ
+        validation_code_1d = [error_node.code for _ in  serializer.errors.values() for error_node in _ ]
+        # バリデーションの理由によってHTTPステータスを管理
+        http_status = status.HTTP_409_CONFLICT if validation_code_1d.count("unique") else status.HTTP_400_BAD_REQUEST
+        return Response(serializer.errors, status=http_status)
     
     # その他の予期せぬエラーが発生した場合
     except Exception as e:

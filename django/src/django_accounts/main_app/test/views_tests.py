@@ -14,9 +14,9 @@ def create_default_user(username="Test User",
   """
   ユーザーを作成する
   """
-  user= User.objects.create_user(username=username,
-                                       email=email,
-                                       password=password)
+  user= User.objects.create_user( username=username,
+                                  email=email,
+                                  password=password)
   return user
 
 def create_jwt_headers(user):
@@ -110,14 +110,18 @@ class SignupViewTests(TestCase):
     signup_viewに無効なパラメータでPOSTメソッドを送ったときにユーザーが追加されない、ログインされない
     """
     post_data = { "username": "a"*16,
-                  "email": "example@example.com",
-                  "password": "password"}
+                  "email": "",
+                  "password": ""}
     response = self.client.post(self.signup_url,
                                 post_data,
                                 content_type=self.content_type)
-    
+
     # 401エラーが返ってくる
     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+    # カスタムエラーメッセージが適用されている
+    self.assertTrue(response.content.decode().find('ユーザーネームが長すぎます'))
+    self.assertTrue(response.content.decode().find('メールアドレスを入力してください'))
+    self.assertTrue(response.content.decode().find('パスワードを入力してください'))
     # ユーザーがデータベースに保存されていない
     self.assertFalse(User.objects.filter(email="example@example.com").exists())
     # クッキーにアクセストークンとリフレッシュトークンが存在しない
@@ -140,9 +144,10 @@ class SignupViewTests(TestCase):
     response = self.client.post(self.signup_url,
                                 post_data,
                                 content_type=self.content_type)
-
     # 409エラーが返ってくる
     self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+    # カスタムエラーメッセージが適用されている
+    self.assertTrue(response.content.decode().find('このユーザーネームは既に使用されています'))
     # クッキーにアクセストークンとリフレッシュトークンが存在しない
     self.assertFalse("Authorization" in response.cookies)
     self.assertFalse("refresh" in response.cookies)
@@ -166,6 +171,8 @@ class SignupViewTests(TestCase):
 
     # 409エラーが返ってくる
     self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+    # カスタムエラーメッセージが適用されている
+    self.assertTrue(response.content.decode().find('このメールアドレスは既に使用されています'))
     # クッキーにアクセストークンとリフレッシュトークンが存在しない
     self.assertFalse("Authorization" in response.cookies)
     self.assertFalse("refresh" in response.cookies)
