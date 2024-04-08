@@ -1,7 +1,7 @@
 import { FormItemProps } from "./types/Form.d"
 import FormValidation from "./FormValidation"
 
-export default function FormItem({onChange, id, labelText, type="text", errorMessage = ""}: FormItemProps){
+export default function FormItem({onChange, id, labelText, type="text", children }: FormItemProps){
   return (
     <div>
       <label htmlFor={id} className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">
@@ -13,7 +13,7 @@ export default function FormItem({onChange, id, labelText, type="text", errorMes
                   p-2.5 dark:bg-gray-700 dark:border-gray-600 
                   dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500"
         required/>
-      <FormValidation errorMessage={errorMessage}/>
+      { children }
     </div>
     )
 }

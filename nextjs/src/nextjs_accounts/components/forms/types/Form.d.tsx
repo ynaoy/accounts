@@ -10,4 +10,4 @@ export type FormItemProps = {
   id: string,
   labelText:string, 
   type?:string,
-  errorMessage?:string }
+  children?: React.ReactNode }

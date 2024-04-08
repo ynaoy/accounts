@@ -1,6 +1,7 @@
 import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import FormItem from "../../components/forms/FormItem"
+import FormValidation from "../../components/forms/FormValidation"
 
 const onChangeMock = jest.fn()
 describe("FormItem", ()=>{
@@ -33,9 +34,13 @@ describe("FormItem", ()=>{
     expect(onChangeMock).toHaveBeenCalled()
   })
 
-  test('エラーメッセージが空でない場合に表示されている',async()=>{
+  test('チルドレンが表示されている',async()=>{
     //レンダー
-    render(<FormItem onChange={onChangeMock} id="test" type="text" labelText="テスト" errorMessage="入力が不正です" />)
+    render(
+      <FormItem onChange={onChangeMock} id="test" type="text" labelText="テスト">
+        <FormValidation errorMessage="入力が不正です" />
+      </FormItem>
+    )
     //エラーメッセージが表示されている
     expect(screen.getByText("入力が不正です")).toBeTruthy()
   })
