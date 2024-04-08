@@ -1,23 +1,23 @@
 import { ValidationStateType, ValidationActionType } from "./types/useFormValidationReducer";
 
 export const initialState:ValidationStateType = {
-  userName: "",
-  email: "",
-  password:"",
+  userNameValidations: [],
+  emailValidations: [],
+  passwordValidations: [],
 };
 
-export function useFormValidationReducer(validationState:ValidationStateType, action: ValidationActionType) {
+export function useFormValidationReducer(validationStates:ValidationStateType, action: ValidationActionType) {
   switch (action.type) {
     case "update_state": {
       return {
-        ...validationState,
-        userName: action.userName,
-        email: action.email,
-        password:  action.password
+        ...validationStates,
+        userNameValidations: action.userNameValidations,
+        emailValidations: action.emailValidations,
+        passwordValidations:  action.passwordValidations
       };
     }
     default:{
-      return validationState;
+      return validationStates;
     }
   }
 }

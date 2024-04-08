@@ -28,15 +28,15 @@ describe("useFormValidationReducer", ()=>{
     act(() => {
       dispatch({
         type: "update_state",
-        userName: "ユーザーネームを入力してください",
-        email: "メールアドレスを入力してください",
-        password: "パスワードを入力してください"
+        userNameValidations: ["ユーザーネームを入力してください"],
+        emailValidations: ["メールアドレスを入力してください"],
+        passwordValidations: ["パスワードを入力してください"]
       });
     })
 
     //stateが更新されている
-    expect(result.current[0].userName).toBe("ユーザーネームを入力してください");
-    expect(result.current[0].email).toBe("メールアドレスを入力してください");
-    expect(result.current[0].password).toBe("パスワードを入力してください");
+    expect(result.current[0].userNameValidations).toContain("ユーザーネームを入力してください");
+    expect(result.current[0].emailValidations).toContain("メールアドレスを入力してください");
+    expect(result.current[0].passwordValidations).toContain("パスワードを入力してください");
   })
 })

@@ -6,7 +6,6 @@ import { postToSignupApi } from '../lib/apiHelper';
 import { checkUserName, checkEmail, checkPassword } from "../lib/validationHelper";
 import Form from './forms/Form';
 import FormItem from './forms/FormItem';
-import { PassThrough } from 'stream';
 
 export default function SignupComponent(){
   // ログイン状態と更新関数を取得する 
