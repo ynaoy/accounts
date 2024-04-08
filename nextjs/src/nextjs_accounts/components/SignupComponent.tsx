@@ -1,11 +1,12 @@
 import { useReducer } from 'react';
 import { useLoginFlgContext, useSetLoginFlgContext } from '../hooks/LoginFlgContext';
-import { initialState, useFormReducer } from '../hooks/useFormReducer';
-import { useFormValidationReducer } from '../hooks/useFormValidationReducer';
+import { initialState as formInitialState, useFormReducer } from '../hooks/useFormReducer';
+import { initialState as validationInitialState, useFormValidationReducer } from '../hooks/useFormValidationReducer';
 import { postToSignupApi } from '../lib/apiHelper';
 import { checkUserName, checkEmail, checkPassword } from "../lib/validationHelper";
 import Form from './forms/Form';
 import FormItem from './forms/FormItem';
+import FormValidation from './forms/FormValidation';
 
 export default function SignupComponent(){
   // ログイン状態と更新関数を取得する 
@@ -13,14 +14,14 @@ export default function SignupComponent(){
   const setLoginFlg = useSetLoginFlgContext()
 
   // フォームの状態を管理する関数
-  const [formState, formDispatch] = useReducer(useFormReducer, initialState)
+  const [formState, formDispatch] = useReducer(useFormReducer, formInitialState)
   // バリデーションの状態を管理する関数
-  const [validationState, validationDispatch] = useReducer(useFormValidationReducer, initialState)
+  const [validationStates, validationDispatch] = useReducer(useFormValidationReducer, validationInitialState)
 
   // APIと通信するか判定のため一時的にバリデーションの値を入れる変数
-  let userNameValidation = ""
-  let emailValidation = ""
-  let passwordValidation = ""
+  let userNameValidations: string[] = []
+  let emailValidations: string[] = []
+  let passwordValidations: string[] = []
 
   const handleSignup = async() => {
     /**
@@ -28,19 +29,19 @@ export default function SignupComponent(){
     **/
 
     // 各項目のバリデーションをチェック
-    userNameValidation = checkUserName(formState["userName"])
-    emailValidation = checkEmail(formState["email"])
-    passwordValidation = checkPassword(formState["password"])
+    userNameValidations = checkUserName(formState["userName"])
+    emailValidations = checkEmail(formState["email"])
+    passwordValidations = checkPassword(formState["password"])
 
     // バリデーション部分のUIの更新
     validationDispatch({ 
       type:'update_state',
-      userName: userNameValidation,
-      email: emailValidation,
-      password: passwordValidation
+      userNameValidations: userNameValidations,
+      emailValidations: emailValidations,
+      passwordValidations: passwordValidations
     })
-    // バリデーションが全て空文字なら処理を続行
-    if(!(!userNameValidation && !emailValidation && !passwordValidation)){
+    // バリデーションが全て空なら処理を続行
+    if(!(!userNameValidations.length && !emailValidations.length && !passwordValidations.length)){
       return
     }
 
@@ -84,11 +85,24 @@ export default function SignupComponent(){
             <Form onClick={()=>handleSignup()}
                   buttonText = "登録">
               <FormItem onChange={(e)=>formDispatch({type: "edited_userName", userName: e.target.value})} 
-                id="username" type="text" labelText="ユーザーネーム" errorMessage={validationState["userName"]}/>
+                id="username" type="text" labelText="ユーザーネーム" >
+                { validationStates["userNameValidations"].map((errorMessage, index)=>
+                  <FormValidation key={index} errorMessage={errorMessage}/>
+                )}
+              </FormItem>
               <FormItem onChange={(e)=>formDispatch({type: "edited_email", email: e.target.value})} 
-                id="email" type="email" labelText="メールアドレス" errorMessage={validationState["email"]}/>
+                id="email" type="email" labelText="メールアドレス" >
+                { validationStates["emailValidations"].map((errorMessage, index)=>
+                  <FormValidation key={index} errorMessage={errorMessage}/>
+                )}
+              </FormItem>
+
               <FormItem onChange={(e)=>formDispatch({type: "edited_password", password: e.target.value})} 
-                id="password" type="password" labelText="パスワード" errorMessage={validationState["password"]}/>
+                id="password" type="password" labelText="パスワード" >
+                { validationStates["passwordValidations"].map((errorMessage, index)=>
+                  <FormValidation key={index} errorMessage={errorMessage}/>
+                )}
+              </FormItem>
             </Form>
           </div>
         </div>
