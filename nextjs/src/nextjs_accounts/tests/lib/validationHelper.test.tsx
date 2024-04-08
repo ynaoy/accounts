@@ -3,22 +3,22 @@ import { checkUserName, checkEmail, checkPassword } from "../../lib/validationHe
 describe("validationHelper", ()=>{
   
   test("ユーザーネームが空の場合のバリデーションのテスト", () => {
-    const validationUserName = checkUserName("")
-    expect(validationUserName).toBe("ユーザーネームを入力してください");
+    const validationUserName: string[] = checkUserName("")
+    expect(validationUserName).toContain("ユーザーネームを入力してください");
   })
 
   test("ユーザーネームが長すぎる場合のバリデーションのテスト", () => {
-    const validationUserName = checkUserName("aaaaaaaaaaaaaaaa")
-    expect(validationUserName).toBe("ユーザーネームが長すぎます");
+    const validationUserName: string[] = checkUserName("aaaaaaaaaaaaaaaa")
+    expect(validationUserName).toContain("ユーザーネームが長すぎます");
   })
 
   test("メールアドレスが空の場合のバリデーションのテスト", () => {
-    const validationEmail = checkEmail("")
-    expect(validationEmail).toBe("メールアドレスを入力してください");
+    const validationEmail: string[] = checkEmail("")
+    expect(validationEmail).toContain("メールアドレスを入力してください");
   })
 
   test("パスワードが空の場合のバリデーションのテスト", () => {
-    const validationPassword = checkPassword("")
-    expect(validationPassword).toBe("パスワードを入力してください");
+    const validationPassword: string[] = checkPassword("")
+    expect(validationPassword).toContain("パスワードを入力してください");
   })
 })
