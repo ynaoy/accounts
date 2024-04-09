@@ -18,56 +18,59 @@ export default function SignupComponent(){
   // バリデーションの状態を管理する関数
   const [validationStates, validationDispatch] = useReducer(useFormValidationReducer, validationInitialState)
 
-  // APIと通信するか判定のため一時的にバリデーションの値を入れる変数
-  let userNameValidations: string[] = []
-  let emailValidations: string[] = []
-  let passwordValidations: string[] = []
-
   const handleSignup = async() => {
     /**
      * ユーザー登録ボタンがクリックされた時の処理
     **/
 
-    // 各項目のバリデーションをチェック
-    userNameValidations = checkUserName(formState["userName"])
-    emailValidations = checkEmail(formState["email"])
-    passwordValidations = checkPassword(formState["password"])
+    // 各項目のバリデーションをチェックし、結果をオブジェクトに格納
+    const validations = {
+      userNameValidations: checkUserName(formState["userName"]),
+      emailValidations: checkEmail(formState["email"]),
+      passwordValidations: checkPassword(formState["password"]),
+    };
 
-    // バリデーション部分のUIの更新
-    validationDispatch({ 
-      type:'update_state',
-      userNameValidations: userNameValidations,
-      emailValidations: emailValidations,
-      passwordValidations: passwordValidations
-    })
-    // バリデーションが全て空なら処理を続行
-    if(!(!userNameValidations.length && !emailValidations.length && !passwordValidations.length)){
-      return
+    // 全てのバリデーションエラーを一次元に
+    const allValidations = Object.values(validations).flat();
+    
+    // いずれかのバリデーションが通らなかった場合、バリデーション部分のUIの更新して処理を中断
+    if(allValidations.length > 0){
+      validationDispatch({ 
+        type: 'update_state',
+        ...validations
+      });
+      return;
     }
-
-    // バックエンドApiにフォームをPOSTしてレスポンスを受け取る
-    let {httpStatus, statusText, data} = await postToSignupApi(
-      { 'username': formState['userName'], // バックエンドではparamsのキーがuser"N"ameではなくuser"n"ame
-        'email': formState['email'],
-        'password': formState['password'],
-      })
-    // 無事ユーザーが作成された場合
-    if(httpStatus == 201){
-      setLoginFlg(() => true);
-    }
-    // バックエンドのバリデーションが通らなかった場合
-    else if(httpStatus == 400){
-      console.log(`httpStatus: ${httpStatus}, statusText: ${statusText}, data: ${data}`)
-      //未実装
-    }
-    // 重複するuserNameかemailのユーザーが存在する場合
-    else if(httpStatus == 409){
-      console.log(`httpStatus: ${httpStatus}, statusText: ${statusText}, data: ${data}`)
-      //未実装
-    }
-    // 予期せぬエラーの場合
-    else{
-      console.log(`httpStatus: ${httpStatus}, statusText: ${statusText}, data: ${data}`)
+    try {
+      // バックエンドAPIにフォームをPOSTしてレスポンスを受け取る
+      let {httpStatus, statusText, data} = await postToSignupApi(
+        { 'username': formState['userName'], // バックエンドではparamsのキーがuser"N"ameではなくuser"n"ame
+          'email': formState['email'],
+          'password': formState['password'],
+        })
+      // 無事ユーザーが作成された場合
+      if(httpStatus == 201){
+        setLoginFlg(() => true);
+      }
+      // バックエンドAPIのバリデーションが通らなかった場合
+      else if([400,409].includes(httpStatus)) {
+        // バリデーション部分のUIの更新
+        validationDispatch({ 
+          type:'update_state',
+          userNameValidations: data['username'] || [],
+          emailValidations:    data['email'] || [],
+          passwordValidations: data['password'] || [],
+        })
+      }
+      // バックエンド側での予期せぬエラーの場合
+      else{
+        console.error(`httpStatus: ${httpStatus}, statusText: ${statusText}, data: ${data}`)
+        //未実装
+      }
+    } 
+    catch (error) {
+      // フロントエンド側での予期せぬエラーの場合
+      console.error('Signup error:', error)
       //未実装
     }
   };

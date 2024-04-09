@@ -15,5 +15,5 @@ export type postToSignupApiReturnType = (params:postToSignupApiParamsType)=>
   Promise<{ 
     httpStatus: number,
     statusText: string,
-    data: {[key: string]:string}
+    data: {[key: string]: string[]}
   }>

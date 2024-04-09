@@ -50,7 +50,7 @@ export const fetchLoginFlg:fetchLoginFlgReturnType =async()=>{
 
 export const postToSignupApi:postToSignupApiReturnType =async(data: postToSignupApiParamsType)=>{
   /**
-   * @return {httpStatus: number, statusText: string, data: {[key:string]: sting}}
+   * @return {httpStatus: number, statusText: string, data: {[key:string]: string[]}}
    */
 
   // APIにリクエストを送る
