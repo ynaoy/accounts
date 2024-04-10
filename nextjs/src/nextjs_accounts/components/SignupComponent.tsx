@@ -1,4 +1,5 @@
-import { useReducer } from 'react';
+import { useEffect, useReducer } from 'react';
+import { useRouter } from 'next/navigation';
 import { useLoginFlgContext, useSetLoginFlgContext } from '../hooks/LoginFlgContext';
 import { initialState as formInitialState, useFormReducer } from '../hooks/useFormReducer';
 import { initialState as validationInitialState, useFormValidationReducer } from '../hooks/useFormValidationReducer';
@@ -9,6 +10,9 @@ import FormItem from './forms/FormItem';
 import FormValidation from './forms/FormValidation';
 
 export default function SignupComponent(){
+  // ページ遷移を管理するルーターの初期化
+  const router = useRouter()
+
   // ログイン状態と更新関数を取得する 
   const loginFlg = useLoginFlgContext();
   const setLoginFlg = useSetLoginFlgContext()
@@ -17,6 +21,14 @@ export default function SignupComponent(){
   const [formState, formDispatch] = useReducer(useFormReducer, formInitialState)
   // バリデーションの状態を管理する関数
   const [validationStates, validationDispatch] = useReducer(useFormValidationReducer, validationInitialState)
+
+  const redirectToIndexPage =()=>{
+    router.push("/")
+  }
+  // 既にログイン済みならインデックスページにリダイレクトする 
+  useEffect(() => {
+    if(loginFlg) redirectToIndexPage()
+  },[loginFlg]);
 
   const handleSignup = async() => {
     /**
@@ -50,7 +62,8 @@ export default function SignupComponent(){
         })
       // 無事ユーザーが作成された場合
       if(httpStatus == 201){
-        setLoginFlg(() => true);
+        setLoginFlg(() => true)
+        redirectToIndexPage()
       }
       // バックエンドAPIのバリデーションが通らなかった場合
       else if([400,409].includes(httpStatus)) {

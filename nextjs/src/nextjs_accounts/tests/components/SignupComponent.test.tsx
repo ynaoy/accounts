@@ -6,6 +6,15 @@ import userEvent from "@testing-library/user-event";
 import SignupComponent from '../../components/SignupComponent'
 import { postToSignupApiParamsType } from '../../lib/types/apiHelper.d'
 
+// Next.jsのuseRouterモジュールのモック
+let routerPushMock = jest.fn()
+jest.mock("next/navigation", () => {
+  return {
+    ...jest.requireActual("next/navigation"),
+    useRouter: ()=> {return { push: routerPushMock }},
+  }
+})
+
 //コンテキストのモック
 let loginFlgMock = false
 let setLoginFlgMock = jest.fn(()=>{ loginFlgMock=!loginFlgMock })
@@ -24,7 +33,6 @@ let postToSignupApiMock = jest.fn(()=>{ return{
   statusText: statusText,
   data: data
  }})
-
 jest.mock('../../lib/apiHelper',
   ()=>({...jest.requireActual('../../lib/apiHelper'),
         postToSignupApi : async(data:postToSignupApiParamsType)=>postToSignupApiMock(), 
@@ -34,10 +42,20 @@ describe('SignupComponent', ()=>{
   afterEach(() => {
     setLoginFlgMock.mockClear()
     postToSignupApiMock.mockClear()
+    routerPushMock.mockClear()
     loginFlgMock = false
     httpStatus = 201
     statusText = "success"
     data = {username:[], email:[], password:[]}
+  });
+
+  test(`ログイン時に、router.pushメソッドが呼び出されている`, async() => {
+    // ログイン状態にしてレンダー
+    loginFlgMock = true
+    render(<SignupComponent/>);
+    
+    // router.pushメソッドが呼び出されている
+    expect(routerPushMock).toHaveBeenCalled()
   });
 
   test(`フォームにバリデーションが通る入力をして、
@@ -73,6 +91,8 @@ describe('SignupComponent', ()=>{
     expect(postToSignupApiMock).toHaveBeenCalled()
     //ログイン状態を変更する関数が呼び出されている
     expect(setLoginFlgMock).toHaveBeenCalled()
+    // router.pushメソッドが呼び出されている
+    expect(routerPushMock).toHaveBeenCalled()
   });
 
   test(`フォームにバリデーションが通らない入力をして、
@@ -109,6 +129,8 @@ describe('SignupComponent', ()=>{
     expect(postToSignupApiMock).not.toHaveBeenCalled()
     //ログイン状態を変更する関数が呼び出されていない
     expect(setLoginFlgMock).not.toHaveBeenCalled()
+    // router.pushメソッドが呼び出されていない
+    expect(routerPushMock).not.toHaveBeenCalled()
   });
 
   test(`API側でバリデーションエラーがあった場合、
@@ -154,5 +176,7 @@ describe('SignupComponent', ()=>{
     expect(postToSignupApiMock).toHaveBeenCalled()
     //ログイン状態を変更する関数が呼び出されていない
     expect(setLoginFlgMock).not.toHaveBeenCalled()
+    // router.pushメソッドが呼び出されていない
+    expect(routerPushMock).not.toHaveBeenCalled()
   });
 })
