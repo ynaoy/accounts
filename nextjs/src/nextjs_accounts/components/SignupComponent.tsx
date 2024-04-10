@@ -1,91 +1,22 @@
-import { useEffect, useReducer } from 'react';
-import { useRouter } from 'next/navigation';
-import { useLoginFlgContext, useSetLoginFlgContext } from '../hooks/LoginFlgContext';
-import { initialState as formInitialState, useFormReducer } from '../hooks/useFormReducer';
-import { initialState as validationInitialState, useFormValidationReducer } from '../hooks/useFormValidationReducer';
-import { postToSignupApi } from '../lib/apiHelper';
-import { checkUserName, checkEmail, checkPassword } from "../lib/validationHelper";
+import { useEffect } from 'react';
+import { useSignup } from '../hooks/useSignup';
+import { useCustomRouter } from '../hooks/useCustomRouter';
 import Form from './forms/Form';
 import FormItem from './forms/FormItem';
 import FormValidation from './forms/FormValidation';
 
 export default function SignupComponent(){
-  // ページ遷移を管理するルーターの初期化
-  const router = useRouter()
+  const { loginFlg, formDispatch, validationStates, registerUser } = useSignup()
+  const { redirectToIndexPage } = useCustomRouter()
 
-  // ログイン状態と更新関数を取得する 
-  const loginFlg = useLoginFlgContext();
-  const setLoginFlg = useSetLoginFlgContext()
-
-  // フォームの状態を管理する関数
-  const [formState, formDispatch] = useReducer(useFormReducer, formInitialState)
-  // バリデーションの状態を管理する関数
-  const [validationStates, validationDispatch] = useReducer(useFormValidationReducer, validationInitialState)
-
-  const redirectToIndexPage =()=>{
-    router.push("/")
-  }
   // 既にログイン済みならインデックスページにリダイレクトする 
   useEffect(() => {
     if(loginFlg) redirectToIndexPage()
   },[loginFlg]);
 
   const handleSignup = async() => {
-    /**
-     * ユーザー登録ボタンがクリックされた時の処理
-    **/
-
-    // 各項目のバリデーションをチェックし、結果をオブジェクトに格納
-    const validations = {
-      userNameValidations: checkUserName(formState["userName"]),
-      emailValidations: checkEmail(formState["email"]),
-      passwordValidations: checkPassword(formState["password"]),
-    };
-
-    // 全てのバリデーションエラーを一次元に
-    const allValidations = Object.values(validations).flat();
-    
-    // いずれかのバリデーションが通らなかった場合、バリデーション部分のUIの更新して処理を中断
-    if(allValidations.length > 0){
-      validationDispatch({ 
-        type: 'update_state',
-        ...validations
-      });
-      return;
-    }
-    try {
-      // バックエンドAPIにフォームをPOSTしてレスポンスを受け取る
-      let {httpStatus, statusText, data} = await postToSignupApi(
-        { 'username': formState['userName'], // バックエンドではparamsのキーがuser"N"ameではなくuser"n"ame
-          'email': formState['email'],
-          'password': formState['password'],
-        })
-      // 無事ユーザーが作成された場合
-      if(httpStatus == 201){
-        setLoginFlg(() => true)
-        redirectToIndexPage()
-      }
-      // バックエンドAPIのバリデーションが通らなかった場合
-      else if([400,409].includes(httpStatus)) {
-        // バリデーション部分のUIの更新
-        validationDispatch({ 
-          type:'update_state',
-          userNameValidations: data['username'] || [],
-          emailValidations:    data['email'] || [],
-          passwordValidations: data['password'] || [],
-        })
-      }
-      // バックエンド側での予期せぬエラーの場合
-      else{
-        console.error(`httpStatus: ${httpStatus}, statusText: ${statusText}, data: ${data}`)
-        //未実装
-      }
-    } 
-    catch (error) {
-      // フロントエンド側での予期せぬエラーの場合
-      console.error('Signup error:', error)
-      //未実装
-    }
+    // ユーザー登録ボタンがクリックされた時の処理
+    registerUser()
   };
 
   return (
