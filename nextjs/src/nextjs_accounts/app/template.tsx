@@ -5,11 +5,12 @@
  */
 import 'tailwindcss/tailwind.css'
 import { useEffect } from 'react'
-import { fetchLoginFlg } from '../lib/apiHelper'
+import { useFetch  } from '../hooks/useFetch';
 import { LoginFlgContextProvider, useSetLoginFlgContext } from '../hooks/LoginFlgContext'
 
 export default function RootTemplate({children,}: {children: React.ReactNode}) {
-  
+  // APIと通信する関数を受け取る
+  const { fetchLoginFlg } = useFetch()
   // グローバル変数からloginFlgの更新用関数を取得
   const setLoginFlg = useSetLoginFlgContext()
 

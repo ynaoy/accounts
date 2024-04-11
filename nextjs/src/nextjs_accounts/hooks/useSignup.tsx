@@ -3,12 +3,13 @@ import { useLoginFlgContext, useSetLoginFlgContext } from './LoginFlgContext';
 import { initialState as formInitialState, useFormReducer } from './useFormReducer';
 import { initialState as validationInitialState, useFormValidationReducer } from './useFormValidationReducer';
 import { useCustomRouter } from './useCustomRouter';
-import { postToSignupApi } from '../lib/apiHelper';
+import { useFetch  } from '../hooks/useFetch';
 
 export const useSignup = () => {
-
   // ページ遷移を管理するルーター
   const { redirectToIndexPage } = useCustomRouter()
+  // APIと通信する関数を受け取る
+  const { postToSignupApi } = useFetch()
   // ログイン状態と更新関数をコンテキストから取得する 
   const loginFlg = useLoginFlgContext();
   const setLoginFlg = useSetLoginFlgContext()

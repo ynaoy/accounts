@@ -4,49 +4,40 @@
 import { render, screen } from '@testing-library/react';
 import userEvent from "@testing-library/user-event";
 import SignupComponent from '../../components/SignupComponent'
-import { postToSignupApiParamsType } from '../../lib/types/apiHelper.d'
 
 // Next.jsのuseRouterモジュールのモック
 let routerPushMock = jest.fn()
-jest.mock("next/navigation", () => {
-  return {
+jest.mock("next/navigation", () => ({
     ...jest.requireActual("next/navigation"),
     useRouter: ()=> {return { push: routerPushMock }},
-  }
-})
+  })
+)
 
 //コンテキストのモック
 let loginFlgMock = false
-let setLoginFlgMock = jest.fn(()=>{ loginFlgMock=!loginFlgMock })
+const setLoginFlgMock = jest.fn().mockReturnValue(true)
 jest.mock('../../hooks/LoginFlgContext',
   ()=>({...jest.requireActual('../../hooks/LoginFlgContext'),
-        useLoginFlgContext : ()=>loginFlgMock,
-        useSetLoginFlgContext : ()=>setLoginFlgMock
-      }));
+    useLoginFlgContext : ()=>loginFlgMock,
+    useSetLoginFlgContext : ()=>setLoginFlgMock
+  })
+)
 
+const postToSignupApiMock = jest.fn().mockResolvedValue({ httpStatus: 201, statusText: "", data: {}})
 //APIと通信するモジュールのモック
-let httpStatus = 201
-let statusText = "success"
-let data: {[key:string]:string[]} = {username:[], email:[], password:[]}
-let postToSignupApiMock = jest.fn(()=>{ return{ 
-  httpStatus: httpStatus,
-  statusText: statusText,
-  data: data
- }})
-jest.mock('../../lib/apiHelper',
-  ()=>({...jest.requireActual('../../lib/apiHelper'),
-        postToSignupApi : async(data:postToSignupApiParamsType)=>postToSignupApiMock(), 
-      }));
+jest.mock('../../hooks/useFetch',
+  ()=>({...jest.requireActual('../../hooks/useFetch'),
+    useFetch: ()=>{
+      return { postToSignupApi : async()=>postToSignupApiMock() }
+    }
+  })
+)
 
 describe('SignupComponent', ()=>{
   afterEach(() => {
-    setLoginFlgMock.mockClear()
-    postToSignupApiMock.mockClear()
-    routerPushMock.mockClear()
+    // モックのリセット
+    jest.clearAllMocks()
     loginFlgMock = false
-    httpStatus = 201
-    statusText = "success"
-    data = {username:[], email:[], password:[]}
   });
 
   test(`ログイン時に、router.pushメソッドが呼び出されている`, async() => {
@@ -135,10 +126,12 @@ describe('SignupComponent', ()=>{
 
   test(`API側でバリデーションエラーがあった場合、
         バリデーション部分のUIが更新され、ログイン状態が変更されない`, async() => {
-
-    httpStatus = 409
-    statusText = "conflict"
-    data = {username:["無効なユーザーネームです"], email:["無効なメールアドレスです"],password: ["無効なパスワードです"]}
+    
+    postToSignupApiMock.mockResolvedValue({ 
+      httpStatus:409, 
+      statusText:'conflict',
+      data: {username:['無効なユーザーネームです'], email:['無効なメールアドレスです'],password: ['無効なパスワードです']}
+    })
     //レンダー
     render(<SignupComponent/>);
   
