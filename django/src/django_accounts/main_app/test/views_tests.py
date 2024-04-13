@@ -176,3 +176,62 @@ class SignupViewTests(TestCase):
     # クッキーにアクセストークンとリフレッシュトークンが存在しない
     self.assertFalse("Authorization" in response.cookies)
     self.assertFalse("refresh" in response.cookies)
+
+  def test_login_view_post_with_valid_params(self):
+    """
+    正しいパラメータでlogin_viewにPOSTメソッドを送ったときにログインされている
+    """
+    test_user = create_default_user()
+    response = self.client.post(reverse("logins:login"),
+                                { "email": test_user.email,
+                                  "password": "password"},
+                                content_type="application/json")
+    # ログインに成功している
+    self.assertEqual(response.status_code, 201)
+    # クッキーにアクセストークンとリフレッシュトークンが存在する
+    self.assertTrue(response.cookies.get("Authorization"))
+    self.assertTrue(response.cookies.get("refresh"))
+
+  def test_login_view_post_with_invalid_password(self):
+    """
+    誤ったメールアドレスでlogin_viewにPOSTメソッドを送ったときにログインされない
+    """
+    test_user = create_default_user()
+    response = self.client.post(reverse("logins:login"),
+                                { "email": test_user.email,
+                                  "password": "ivalid_password"},
+                                content_type="application/json")
+    # 401エラーが返ってくる
+    self.assertEqual(response.status_code, 401)
+    # クッキーが空
+    self.assertFalse(response.cookies)
+
+  def test_login_view_post_with_invalid_email(self):
+    """
+    誤ったパスワードでlogin_viewにPOSTメソッドを送ったときにログインされない
+    """
+    test_user = create_default_user()
+    response = self.client.post(reverse("logins:login"),
+                                { "email": "invalidexample@example.com",
+                                  "password": "password"},
+                                content_type="application/json")
+    # 401エラーが返ってくる
+    self.assertEqual(response.status_code, 401)
+    # クッキーが空
+    self.assertFalse(response.cookies)
+
+  def test_login_view_post_with_login(self):
+    """
+    ログイン中にlogin_viewにPOSTメソッドを送ったときにエラーが表示される
+    """
+    test_user = create_default_user()
+    headers = create_jwt_headers(test_user)
+    response = self.client.post(reverse("logins:login"),
+                                { "email": test_user.email,
+                                  "password": "password"},
+                                headers=headers,
+                                content_type="application/json")
+    # 403エラーが返ってくる
+    self.assertEqual(response.status_code, 403)
+    # クッキーが空
+    self.assertFalse(response.cookies)
