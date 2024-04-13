@@ -208,7 +208,6 @@ class LoginViewTests(TestCase):
                                   "password": "ivalid_password"},
                                 content_type="application/json")
     # 401エラーが返ってくる
-    print(response.content.decode())
     self.assertEqual(response.status_code, 401)
     # クッキーが空
     self.assertFalse(response.cookies)

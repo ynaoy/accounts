@@ -36,7 +36,7 @@ class SignupView(CreateAPIView):
 
   def post(self, request, format=None, *args, **kwargs):
     try:
-      serializer = self.serializer_class(data=request.data)
+      serializer = self.serializer_class(data=request.data, context=self.get_serializer_context())
       # バリデーションチェック
       if serializer.is_valid(valid_fields=self.valid_fields):
         # ユーザー作成
@@ -58,7 +58,7 @@ class SignupView(CreateAPIView):
     # その他の予期せぬエラーが発生した場合
     except Exception as e:
       return Response({'error': '予期せぬエラーが発生しました。'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
-    
+  
 class LoginView(CreateAPIView):
     """
     ログイン用ビュー 
@@ -67,10 +67,10 @@ class LoginView(CreateAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     valid_fields = ("email", "password",)               
-    
+
     def post(self, request, format=None, *args, **kwargs):
       try:
-        serializer = self.serializer_class(data=request.data)
+        serializer = self.serializer_class(data=request.data, context=self.get_serializer_context())
         # バリデーションチェック
         if serializer.is_valid(valid_fields=self.valid_fields):
           # メールアドレスをキーにしてユーザーが存在するか確認

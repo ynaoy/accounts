@@ -9,7 +9,7 @@ class UserSerializer(serializers.ModelSerializer):
 
     # メンバ変数群。モデルに保存する前のバリデーションを管理
     username = serializers.CharField(
-        required=True,
+        required=False, # リクエストの際に必須なフィールドかどうか。空文字判定はallow_blank属性で設定できる(デフォルトはFalse)
         max_length=15,
         error_messages={
             'blank': 'ユーザーネームを入力してください',
@@ -17,13 +17,13 @@ class UserSerializer(serializers.ModelSerializer):
         }
     )
     email = serializers.EmailField(
-        required=True,
+        required=False,
         error_messages={
             'blank': 'メールアドレスを入力してください'
         }
     )
     password = serializers.CharField(
-        required=True,
+        required=False,
         write_only=True,
         error_messages={
             'blank': 'パスワードを入力してください'
@@ -39,18 +39,6 @@ class UserSerializer(serializers.ModelSerializer):
       """
       model = User
       fields = ('id', 'username', 'email', 'password')
-
-    def __init__(self, *args, **kwargs):
-        """
-         PUT,PATCHリクエストの時にusername, email, passwordフィールドを必須にしない
-        """
-        super(UserSerializer, self).__init__(*args, **kwargs)
-        
-        request = self.context.get('request')
-        if request and request.method in ['PUT', 'PATCH']:
-          self.fields['username'].required = False
-          self.fields['email'].required = False
-          self.fields['password'].required = False
 
     def create(self, validated_data):
         """
@@ -70,16 +58,24 @@ class UserSerializer(serializers.ModelSerializer):
         """
          is_validメソッドを使う時に、その内部で実行される
         """
-        if User.objects.filter(username=value).exists():
-            raise serializers.ValidationError('このユーザーネームは既に使用されています','unique')
+        # コンテキストからリクエストを取得
+        request = self.context.get('request', None)
+        # Signupビューでのみユーザーネームの重複チェックを行う
+        if request and request.path == '/api/signup/':
+          if User.objects.filter(username=value).exists():
+              raise serializers.ValidationError('このユーザーネームは既に使用されています','unique')
         return value
 
     def validate_email(self, value):
         """
          is_validメソッドを使う時に、その内部で実行される
         """
-        if User.objects.filter(email=value).exists():
-            raise serializers.ValidationError('このメールアドレスは既に使用されています','unique')
+        # コンテキストからリクエストを取得
+        request = self.context.get('request', None)
+        # Signupビューでのみユーザーネームの重複チェックを行う
+        if request and request.path == '/api/signup/':
+          if User.objects.filter(email=value).exists():
+              raise serializers.ValidationError('このメールアドレスは既に使用されています','unique')
         return value
     
     def is_valid(self, valid_fields=(), **kwargs):
