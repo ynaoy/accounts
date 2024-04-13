@@ -177,12 +177,18 @@ class SignupViewTests(TestCase):
     self.assertFalse("Authorization" in response.cookies)
     self.assertFalse("refresh" in response.cookies)
 
+class LoginViewTests(TestCase):
+
+  def setUp(self):
+    self.login_url = reverse("main_app:login")
+    self.content_type = "application/json"
+
   def test_login_view_post_with_valid_params(self):
     """
     正しいパラメータでlogin_viewにPOSTメソッドを送ったときにログインされている
     """
     test_user = create_default_user()
-    response = self.client.post(reverse("logins:login"),
+    response = self.client.post(self.login_url,
                                 { "email": test_user.email,
                                   "password": "password"},
                                 content_type="application/json")
@@ -197,11 +203,12 @@ class SignupViewTests(TestCase):
     誤ったメールアドレスでlogin_viewにPOSTメソッドを送ったときにログインされない
     """
     test_user = create_default_user()
-    response = self.client.post(reverse("logins:login"),
+    response = self.client.post(self.login_url,
                                 { "email": test_user.email,
                                   "password": "ivalid_password"},
                                 content_type="application/json")
     # 401エラーが返ってくる
+    print(response.content.decode())
     self.assertEqual(response.status_code, 401)
     # クッキーが空
     self.assertFalse(response.cookies)
@@ -211,7 +218,7 @@ class SignupViewTests(TestCase):
     誤ったパスワードでlogin_viewにPOSTメソッドを送ったときにログインされない
     """
     test_user = create_default_user()
-    response = self.client.post(reverse("logins:login"),
+    response = self.client.post(self.login_url,
                                 { "email": "invalidexample@example.com",
                                   "password": "password"},
                                 content_type="application/json")
@@ -226,7 +233,7 @@ class SignupViewTests(TestCase):
     """
     test_user = create_default_user()
     headers = create_jwt_headers(test_user)
-    response = self.client.post(reverse("logins:login"),
+    response = self.client.post(self.login_url,
                                 { "email": test_user.email,
                                   "password": "password"},
                                 headers=headers,

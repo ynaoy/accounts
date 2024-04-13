@@ -5,6 +5,7 @@ from rest_framework.generics import RetrieveAPIView, ListAPIView, CreateAPIView,
 from rest_framework.response import Response
 from .serializer import UserSerializer
 from .models import User
+from .permissions import OnlyLogoutPerm
 from .utils import get_jwt_and_set_cookie, verify_jwt
 
 class IsLoginView(RetrieveAPIView):
@@ -57,4 +58,36 @@ class SignupView(CreateAPIView):
     # その他の予期せぬエラーが発生した場合
     except Exception as e:
       return Response({'error': '予期せぬエラーが発生しました。'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+class LoginView(CreateAPIView):
+    """
+    ログイン用ビュー 
+    """
+    permission_classes = (AllowAny, OnlyLogoutPerm,)
+    queryset = User.objects.all()
+    serializer_class = UserSerializer
+    valid_fields = ("email", "password",)               
+    
+    def post(self, request, format=None, *args, **kwargs):
+      try:
+        serializer = self.serializer_class(data=request.data)
+        # バリデーションチェック
+        if serializer.is_valid(valid_fields=self.valid_fields):
+          # メールアドレスをキーにしてユーザーが存在するか確認
+          email = serializer.validated_data["email"]
+          password = serializer.validated_data["password"]
+          user_list = User.objects.filter(email=email)
+          # パスワード認証
+          if user_list and check_password(password, user_list[0].password):
+              user = user_list[0]
+              # jwtを発行してクッキーにセットする。そのレスポンスを返す
+              response = Response(serializer.validated_data, status=status.HTTP_201_CREATED)
+              responce = get_jwt_and_set_cookie(user, response)
+              return responce
+          else:
+              return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        # その他の予期せぬエラーが発生した場合
+      except Exception as e:
+        return Response({'error': '予期せぬエラーが発生しました。'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
