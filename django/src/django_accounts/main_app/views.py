@@ -3,7 +3,7 @@ from rest_framework import status
 from rest_framework.permissions import AllowAny,IsAuthenticated
 from rest_framework.generics import RetrieveAPIView, ListAPIView, CreateAPIView, UpdateAPIView, DestroyAPIView
 from rest_framework.response import Response
-from .serializer import UserSerializer
+from .serializer import UserSerializer, username_unique_validator, email_unique_validator
 from .models import User
 from .permissions import OnlyLogoutPerm
 from .utils import get_jwt_and_set_cookie, verify_jwt
@@ -33,7 +33,17 @@ class SignupView(CreateAPIView):
   queryset = User.objects.all()
   serializer_class = UserSerializer
   valid_fields = ("username", "email", "password")
+  required_fields= ("username", "email", "password")
 
+  def get_serializer_context(self):
+    context = super().get_serializer_context()
+    context["custom_validators"] = {
+      "username": [username_unique_validator],
+      "email": [email_unique_validator]
+    }
+    context["required_fields"] = { field: True for field in self.required_fields }
+    return context
+  
   def post(self, request, format=None, *args, **kwargs):
     try:
       serializer = self.serializer_class(data=request.data, context=self.get_serializer_context())
@@ -60,34 +70,40 @@ class SignupView(CreateAPIView):
       return Response({'error': '予期せぬエラーが発生しました。'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
   
 class LoginView(CreateAPIView):
-    """
-    ログイン用ビュー 
-    """
-    permission_classes = (AllowAny, OnlyLogoutPerm,)
-    queryset = User.objects.all()
-    serializer_class = UserSerializer
-    valid_fields = ("email", "password",)               
+  """
+  ログイン用ビュー 
+  """
+  permission_classes = (AllowAny, OnlyLogoutPerm,)
+  queryset = User.objects.all()
+  serializer_class = UserSerializer
+  valid_fields = ("email", "password",)
+  required_fields = ("email", "password") 
 
-    def post(self, request, format=None, *args, **kwargs):
-      try:
-        serializer = self.serializer_class(data=request.data, context=self.get_serializer_context())
-        # バリデーションチェック
-        if serializer.is_valid(valid_fields=self.valid_fields):
-          # メールアドレスをキーにしてユーザーが存在するか確認
-          email = serializer.validated_data["email"]
-          password = serializer.validated_data["password"]
-          user_list = User.objects.filter(email=email)
-          # パスワード認証
-          if user_list and check_password(password, user_list[0].password):
-              user = user_list[0]
-              # jwtを発行してクッキーにセットする。そのレスポンスを返す
-              response = Response(serializer.validated_data, status=status.HTTP_201_CREATED)
-              responce = get_jwt_and_set_cookie(user, response)
-              return responce
-          else:
-              return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        # その他の予期せぬエラーが発生した場合
-      except Exception as e:
-        return Response({'error': '予期せぬエラーが発生しました。'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+  def get_serializer_context(self):
+    context = super().get_serializer_context()
+    context["required_fields"] = { field: True for field in self.required_fields }
+    return context
+  
+  def post(self, request, format=None, *args, **kwargs):
+    try:
+      serializer = self.serializer_class(data=request.data, context=self.get_serializer_context())
+      # バリデーションチェック
+      if serializer.is_valid(valid_fields=self.valid_fields):
+        # メールアドレスをキーにしてユーザーが存在するか確認
+        email = serializer.validated_data["email"]
+        password = serializer.validated_data["password"]
+        user_list = User.objects.filter(email=email)
+        # パスワード認証
+        if user_list and check_password(password, user_list[0].password):
+          user = user_list[0]
+          # jwtを発行してクッキーにセットする。そのレスポンスを返す
+          response = Response(serializer.validated_data, status=status.HTTP_201_CREATED)
+          responce = get_jwt_and_set_cookie(user, response)
+          return responce
+        else:
+          return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
+      return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    # その他の予期せぬエラーが発生した場合
+    except Exception as e:
+      return Response({'error': '予期せぬエラーが発生しました。'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     

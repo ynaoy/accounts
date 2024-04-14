@@ -177,6 +177,26 @@ class SignupViewTests(TestCase):
     self.assertFalse("Authorization" in response.cookies)
     self.assertFalse("refresh" in response.cookies)
 
+  def test_signup_view_required_params(self):
+    """  
+    signup_viewに必要なパラメータを指定しなかったときにユーザーが追加されずログインされない
+    """
+    post_data = {}
+    
+    response = self.client.post(self.signup_url,
+                                post_data,
+                                content_type=self.content_type)
+    
+    # 400エラーが返ってくる
+    self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+    # カスタムエラーメッセージが適用されている
+    self.assertTrue(response.content.decode().find('ユーザーネームは必須です'))
+    self.assertTrue(response.content.decode().find('メールアドレスは必須です'))
+    self.assertTrue(response.content.decode().find('パスワードは必須です'))
+    # クッキーにアクセストークンとリフレッシュトークンが存在しない
+    self.assertFalse("Authorization" in response.cookies)
+    self.assertFalse("refresh" in response.cookies)
+
 class LoginViewTests(TestCase):
 
   def setUp(self):
@@ -241,3 +261,22 @@ class LoginViewTests(TestCase):
     self.assertEqual(response.status_code, 403)
     # クッキーが空
     self.assertFalse(response.cookies)
+
+  def test_login_view_required_params(self):
+    """  
+    login_viewに必要なパラメータを指定しなかったときにログインされない
+    """
+    post_data = {}
+    
+    response = self.client.post(self.login_url,
+                                post_data,
+                                content_type=self.content_type)
+    
+    # 400エラーが返ってくる
+    self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+    # カスタムエラーメッセージが適用されている
+    self.assertTrue(response.content.decode().find('メールアドレスは必須です'))
+    self.assertTrue(response.content.decode().find('パスワードは必須です'))
+    # クッキーにアクセストークンとリフレッシュトークンが存在しない
+    self.assertFalse("Authorization" in response.cookies)
+    self.assertFalse("refresh" in response.cookies)
