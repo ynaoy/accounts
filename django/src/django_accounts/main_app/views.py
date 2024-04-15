@@ -67,7 +67,7 @@ class SignupView(CreateAPIView):
     
     # その他の予期せぬエラーが発生した場合
     except Exception as e:
-      return Response({'error': '予期せぬエラーが発生しました。'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+      return Response({"error": "予期せぬエラーが発生しました。"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
   
 class LoginView(CreateAPIView):
   """
@@ -92,18 +92,22 @@ class LoginView(CreateAPIView):
         # メールアドレスをキーにしてユーザーが存在するか確認
         email = serializer.validated_data["email"]
         password = serializer.validated_data["password"]
-        user_list = User.objects.filter(email=email)
+        user_list = User.objects.filter(email=email) 
         # パスワード認証
-        if user_list and check_password(password, user_list[0].password):
+        if check_password(password, user_list[0].password): # user_listが空の時はエラー処理が拾う
           user = user_list[0]
           # jwtを発行してクッキーにセットする。そのレスポンスを返す
-          response = Response(serializer.validated_data, status=status.HTTP_201_CREATED)
+          response = Response(serializer.validated_data, status=status.HTTP_200_OK)
           responce = get_jwt_and_set_cookie(user, response)
           return responce
         else:
-          return Response(serializer.errors, status=status.HTTP_401_UNAUTHORIZED)
+          return Response({"password": ["パスワードが間違っています"]}, status=status.HTTP_401_UNAUTHORIZED)
       return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    # ユーザーが存在しない場合
+    except IndexError:
+      return Response({"email": ["メールアドレスが間違っています"]}, status=status.HTTP_404_NOT_FOUND)
     # その他の予期せぬエラーが発生した場合
     except Exception as e:
-      return Response({'error': '予期せぬエラーが発生しました。'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+      print(e)
+      return Response({"error": "予期せぬエラーが発生しました。"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     

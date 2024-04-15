@@ -119,9 +119,9 @@ class SignupViewTests(TestCase):
     # 401エラーが返ってくる
     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
     # カスタムエラーメッセージが適用されている
-    self.assertTrue(response.content.decode().find('ユーザーネームが長すぎます'))
-    self.assertTrue(response.content.decode().find('メールアドレスを入力してください'))
-    self.assertTrue(response.content.decode().find('パスワードを入力してください'))
+    self.assertTrue(response.content.decode().find("[ユーザーネームが長すぎます]"))
+    self.assertTrue(response.content.decode().find("[メールアドレスを入力してください]"))
+    self.assertTrue(response.content.decode().find("[パスワードを入力してください]"))
     # ユーザーがデータベースに保存されていない
     self.assertFalse(User.objects.filter(email="example@example.com").exists())
     # クッキーにアクセストークンとリフレッシュトークンが存在しない
@@ -147,7 +147,7 @@ class SignupViewTests(TestCase):
     # 409エラーが返ってくる
     self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
     # カスタムエラーメッセージが適用されている
-    self.assertTrue(response.content.decode().find('このユーザーネームは既に使用されています'))
+    self.assertTrue(response.content.decode().find("[このユーザーネームは既に使用されています]"))
     # クッキーにアクセストークンとリフレッシュトークンが存在しない
     self.assertFalse("Authorization" in response.cookies)
     self.assertFalse("refresh" in response.cookies)
@@ -172,7 +172,7 @@ class SignupViewTests(TestCase):
     # 409エラーが返ってくる
     self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
     # カスタムエラーメッセージが適用されている
-    self.assertTrue(response.content.decode().find('このメールアドレスは既に使用されています'))
+    self.assertTrue(response.content.decode().find("[このメールアドレスは既に使用されています]"))
     # クッキーにアクセストークンとリフレッシュトークンが存在しない
     self.assertFalse("Authorization" in response.cookies)
     self.assertFalse("refresh" in response.cookies)
@@ -190,9 +190,9 @@ class SignupViewTests(TestCase):
     # 400エラーが返ってくる
     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
     # カスタムエラーメッセージが適用されている
-    self.assertTrue(response.content.decode().find('ユーザーネームは必須です'))
-    self.assertTrue(response.content.decode().find('メールアドレスは必須です'))
-    self.assertTrue(response.content.decode().find('パスワードは必須です'))
+    self.assertTrue(response.content.decode().find("[ユーザーネームは必須です]"))
+    self.assertTrue(response.content.decode().find("[メールアドレスは必須です]"))
+    self.assertTrue(response.content.decode().find("[パスワードは必須です]"))
     # クッキーにアクセストークンとリフレッシュトークンが存在しない
     self.assertFalse("Authorization" in response.cookies)
     self.assertFalse("refresh" in response.cookies)
@@ -205,7 +205,8 @@ class LoginViewTests(TestCase):
 
   def test_login_view_post_with_valid_params(self):
     """
-    正しいパラメータでlogin_viewにPOSTメソッドを送ったときにログインされている
+    適切なパラメータでlogin_viewにPOSTメソッドを送ったときにステータスコード200が返ってきて、
+    ログイン状態が変わっている
     """
     test_user = create_default_user()
     response = self.client.post(self.login_url,
@@ -213,14 +214,32 @@ class LoginViewTests(TestCase):
                                   "password": "password"},
                                 content_type="application/json")
     # ログインに成功している
-    self.assertEqual(response.status_code, 201)
+    self.assertEqual(response.status_code, 200)
     # クッキーにアクセストークンとリフレッシュトークンが存在する
     self.assertTrue(response.cookies.get("Authorization"))
     self.assertTrue(response.cookies.get("refresh"))
 
+  def test_login_view_post_with_valid_params(self):
+    """
+    バリデーションの通らないパラメータでlogin_viewにPOSTメソッドを送ったときに400エラーが返ってきて、
+    ログイン状態が変わらない
+    """
+    test_user = create_default_user()
+    response = self.client.post(self.login_url,
+                                { "email": "",
+                                  "password": ""},
+                                content_type="application/json")
+    # 400エラーが返ってくる
+    self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+    # カスタムエラーメッセージが適用されている
+    self.assertTrue(response.content.decode().find("[メールアドレスを入力してください]"))
+    self.assertTrue(response.content.decode().find("[パスワードを入力してください]"))
+    # クッキーが空
+    self.assertFalse(response.cookies)
+
   def test_login_view_post_with_invalid_password(self):
     """
-    誤ったメールアドレスでlogin_viewにPOSTメソッドを送ったときにログインされない
+    誤ったパスワードでlogin_viewにPOSTメソッドを送ったときに401エラーが帰ってきて、ログインされない
     """
     test_user = create_default_user()
     response = self.client.post(self.login_url,
@@ -229,12 +248,13 @@ class LoginViewTests(TestCase):
                                 content_type="application/json")
     # 401エラーが返ってくる
     self.assertEqual(response.status_code, 401)
+    self.assertTrue(response.content.decode().find("[パスワードが間違っています]"))
     # クッキーが空
     self.assertFalse(response.cookies)
 
   def test_login_view_post_with_invalid_email(self):
     """
-    誤ったパスワードでlogin_viewにPOSTメソッドを送ったときにログインされない
+    誤ったメールアドレスでlogin_viewにPOSTメソッドを送ったときに404エラーが帰ってきてログインされない
     """
     test_user = create_default_user()
     response = self.client.post(self.login_url,
@@ -242,13 +262,14 @@ class LoginViewTests(TestCase):
                                   "password": "password"},
                                 content_type="application/json")
     # 401エラーが返ってくる
-    self.assertEqual(response.status_code, 401)
+    self.assertEqual(response.status_code, 404)
+    self.assertTrue(response.content.decode().find("[メールアドレスが間違っています]"))
     # クッキーが空
     self.assertFalse(response.cookies)
 
   def test_login_view_post_with_login(self):
     """
-    ログイン中にlogin_viewにPOSTメソッドを送ったときにエラーが表示される
+    ログイン中にlogin_viewにPOSTメソッドを送ったときに403エラーが帰ってくる
     """
     test_user = create_default_user()
     headers = create_jwt_headers(test_user)
@@ -264,7 +285,8 @@ class LoginViewTests(TestCase):
 
   def test_login_view_required_params(self):
     """  
-    login_viewに必要なパラメータを指定しなかったときにログインされない
+    必要なパラメータが不足している状態でlogin_viewにPOSTメソッドを送ったときに
+    400エラーが帰ってきてログインされない
     """
     post_data = {}
     
@@ -275,8 +297,8 @@ class LoginViewTests(TestCase):
     # 400エラーが返ってくる
     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
     # カスタムエラーメッセージが適用されている
-    self.assertTrue(response.content.decode().find('メールアドレスは必須です'))
-    self.assertTrue(response.content.decode().find('パスワードは必須です'))
+    self.assertTrue(response.content.decode().find("[メールアドレスは必須です]"))
+    self.assertTrue(response.content.decode().find("[パスワードは必須です]"))
     # クッキーにアクセストークンとリフレッシュトークンが存在しない
     self.assertFalse("Authorization" in response.cookies)
     self.assertFalse("refresh" in response.cookies)
