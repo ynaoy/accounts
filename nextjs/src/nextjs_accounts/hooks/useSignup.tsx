@@ -1,7 +1,8 @@
 import { useReducer } from 'react';
 import { useLoginFlgContext, useSetLoginFlgContext } from './LoginFlgContext';
 import { initialState as formInitialState, useFormReducer } from './useFormReducer';
-import { initialState as validationInitialState, useFormValidationReducer } from './useFormValidationReducer';
+import { initialState as validationInitialState, useFormValidationReducer,
+         checkUserName, checkEmail, checkPassword } from './useFormValidationReducer';
 import { useCustomRouter } from './useCustomRouter';
 import { useFetch  } from '../hooks/useFetch';
 
@@ -17,48 +18,6 @@ export const useSignup = () => {
   const [formState, formDispatch] = useReducer(useFormReducer, formInitialState)
   // バリデーションの状態を管理するリデューサ
   const [validationStates, validationDispatch] = useReducer(useFormValidationReducer, validationInitialState)
-
-  const checkUserName = (userName:string)=>{
-    /**
-     * ユーザーネームのバリデーションを実行
-    **/
-
-    const strSize:number = userName.length 
-    let Validations:string[] = []
-  
-    if (strSize==0) Validations.push("ユーザーネームを入力してください")
-    if (strSize>15) Validations.push("ユーザーネームが長すぎます")
-  
-    return Validations
-  }
-  
-  const checkEmail = (email:string)=>{
-    /**
-     * メールアドレスのバリデーションを実行
-     * @return {string[]}
-    **/
-
-    const strSize:number = email.length 
-    let Validations:string[] = []
-  
-    if(strSize==0) Validations.push("メールアドレスを入力してください")
-    
-    return Validations
-  }
-  
-  const checkPassword = (password:string)=>{
-    /**
-     * パスワードのバリデーションを実行
-     * @return {string[]}
-    **/
-
-    const strSize:number = password.length
-    let Validations:string[] = []
-  
-    if(strSize==0) Validations.push("パスワードを入力してください")
-    
-    return Validations
-  }
 
   const validateForm = () => {
     /**
