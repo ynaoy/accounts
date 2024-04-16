@@ -87,4 +87,42 @@ describe('useFetch', () => {
                                statusText: 'Internal Server Error', 
                                data: { message: '予期せぬエラーが発生しました' }})
   })
+
+  test('postToLoginApiでリクエストに成功した際に、適切なオブジェクトが返されている', async () => {
+    // fetchのモック
+    global.fetch = jest.fn().mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: true,
+        status: 201,
+        statusText: 'OK',
+        json: () => Promise.resolve({ message: 'Success' }),
+      })
+    );
+    // useFetchの初期化
+    const { result } = renderHook(() => useFetch());
+
+    // postToLoginApiを実行して結果をテスト
+    let response = await result.current.postToLoginApi({ email:'testemail@examplecom', 
+                                                          password: 'password' })
+    expect(response).toEqual({ httpStatus: 201, statusText: 'OK', data: { message: 'Success' } })
+  })
+
+  test('postToLoginApiでリクエストに失敗した際に、適切なオブジェクトが返されている', async () => {
+    // fetchのモック
+    global.fetch = jest.fn().mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: false,
+        status: 500,
+        statusText: 'Internal Server Error',
+      })
+    )
+    // useFetchの初期化
+    const { result } = renderHook(() => useFetch())
+
+    // postToLoginApiを実行して結果をテスト
+    let response = await result.current.postToLoginApi({ email:'', password: '' })
+    expect(response).toEqual({ httpStatus: 500, 
+                               statusText: 'Internal Server Error', 
+                               data: { message: '予期せぬエラーが発生しました' }})
+  })
 })

@@ -1,5 +1,6 @@
 import {  fetchLoginFlgReturnType, fetchParamsType, 
-  postToSignupApiParamsType, postToSignupApiReturnType } from './types/useFetch.d'
+  postToSignupApiParamsType, postToSignupApiReturnType,
+  postToLoginApiParamsType, postToLoginApiReturnType } from './types/useFetch.d'
 import { getCookie } from 'cookies-next';
 
 const fetchResponseFromApi = async( url:string, 
@@ -82,8 +83,41 @@ export const useFetch = ()=> {
     }
   }
 
+  const postToLoginApi:postToLoginApiReturnType =async(data: postToLoginApiParamsType)=>{
+    /**
+     * 外部APIのloginパスにPOSTメソッドでリクエストを送る
+     * @return {httpStatus: number, statusText: string, data: {[key:string]: string[]}}
+    */
+    
+    // APIにリクエストを送る
+    try{
+      const response = await fetchResponseFromApi(
+      `${process.env.NEXT_PUBLIC_API_ORIGIN}/api/login/`,
+      { method:'POST', headers: {}, credentials: 'include', },
+      data)
+
+      //jsonを解凍してリターン 
+      let ret = await response.json()
+      console.log(ret)
+      return {
+        httpStatus: response.status,
+        statusText: response.statusText,
+        data: ret
+      }    
+    } catch(error) {
+      console.error('Undefind Error:', error);
+      return { 
+        // 汎用的なエラーレスポンスを返す
+        httpStatus: 500,
+        statusText: 'Internal Server Error',
+        data: { message: '予期せぬエラーが発生しました' },
+      };
+    }
+  }
+
   return{
     fetchLoginFlg,
-    postToSignupApi
+    postToSignupApi,
+    postToLoginApi
   }
 }
