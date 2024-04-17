@@ -54,7 +54,7 @@ export const useLogin = () => {
       // バックエンドAPIにフォームをPOSTしてレスポンスを受け取る
       let {httpStatus, statusText, data } = await postToLoginApi(
         { 'email': formState['email'], 'password': formState['password'] })
-      if(httpStatus == 201){
+      if(httpStatus == 200){
         // ログインに成功した場合、ログイン状態を更新してリダイレクト
         setLoginFlg(() => true)
         redirectToIndexPage()
