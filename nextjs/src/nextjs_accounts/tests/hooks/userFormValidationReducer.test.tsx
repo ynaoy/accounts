@@ -18,7 +18,81 @@ describe("useFormValidationReducer", ()=>{
     expect(state).toEqual(initialState);
   })
 
-  test("stateが更新された場合のバリデーションのテスト", () => {
+  test("update_userName_validationsが呼び出された場合のバリデーションのテスト", () => {
+    //リデューサーの初期化
+    const { result } = renderHook(() => useReducer(useFormValidationReducer, initialState))
+
+    //dispatchの取得
+    const [, dispatch] = result.current;
+
+    act(() => {
+      dispatch({
+        type: "update_userName_validations",
+        userNameValidations: ["ユーザーネームを入力してください"]
+      });
+    })
+
+    //stateが更新されている
+    expect(result.current[0].userNameValidations).toContain("ユーザーネームを入力してください");
+  })
+
+  test("update_email_validationsが呼び出された場合のバリデーションのテスト", () => {
+    //リデューサーの初期化
+    const { result } = renderHook(() => useReducer(useFormValidationReducer, initialState))
+
+    //dispatchの取得
+    const [, dispatch] = result.current;
+
+    act(() => {
+      dispatch({
+        type: "update_email_validations",
+        emailValidations: ["メールアドレスを入力してください"],
+      });
+    })
+
+    //stateが更新されている
+    expect(result.current[0].emailValidations).toContain("メールアドレスを入力してください");
+  })
+
+  test("update_password_validationsが呼び出された場合のバリデーションのテスト", () => {
+    //リデューサーの初期化
+    const { result } = renderHook(() => useReducer(useFormValidationReducer, initialState))
+
+    //dispatchの取得
+    const [, dispatch] = result.current;
+
+    act(() => {
+      dispatch({
+        type: "update_password_validations",
+        passwordValidations: ["パスワードを入力してください"]
+      });
+    })
+
+    //stateが更新されている
+    expect(result.current[0].passwordValidations).toContain("パスワードを入力してください");
+  })
+  
+  test("update_login_validationsが呼び出された場合のバリデーションのテスト", () => {
+    //リデューサーの初期化
+    const { result } = renderHook(() => useReducer(useFormValidationReducer, initialState))
+
+    //dispatchの取得
+    const [, dispatch] = result.current;
+
+    act(() => {
+      dispatch({
+        type: "update_login_validations",
+        emailValidations: ["メールアドレスを入力してください"],
+        passwordValidations: ["パスワードを入力してください"]
+      });
+    })
+
+    //stateが更新されている
+    expect(result.current[0].emailValidations).toContain("メールアドレスを入力してください");
+    expect(result.current[0].passwordValidations).toContain("パスワードを入力してください");
+  })
+
+  test("update_stateが呼び出された場合のバリデーションのテスト", () => {
     //リデューサーの初期化
     const { result } = renderHook(() => useReducer(useFormValidationReducer, initialState))
 

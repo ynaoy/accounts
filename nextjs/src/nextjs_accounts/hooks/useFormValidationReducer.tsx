@@ -8,6 +8,35 @@ export const initialState:ValidationStateType = {
 
 export function useFormValidationReducer(validationStates:ValidationStateType, action: ValidationActionType) {
   switch (action.type) {
+    case "update_userName_validations": {
+      return {
+        ...validationStates,
+        userNameValidations: action.userNameValidations,
+      };
+    }
+
+    case "update_email_validations": {
+      return {
+        ...validationStates,
+        emailValidations: action.emailValidations,
+      };
+    }
+
+    case "update_password_validations": {
+      return {
+        ...validationStates,
+        passwordValidations:  action.passwordValidations
+      };
+    }
+
+    case "update_login_validations": {
+      return {
+        ...validationStates,
+        emailValidations: action.emailValidations,
+        passwordValidations:  action.passwordValidations
+      };
+    }
+    
     case "update_state": {
       return {
         ...validationStates,
