@@ -55,7 +55,7 @@ export const useLogin = () => {
       let {httpStatus, statusText, data } = await postToLoginApi(
         { 'email': formState['email'], 'password': formState['password'] })
       if(httpStatus == 201){
-        // 無事ユーザーが作成された場合、ログイン状態を更新してリダイレクト
+        // ログインに成功した場合、ログイン状態を更新してリダイレクト
         setLoginFlg(() => true)
         redirectToIndexPage()
       } else if([400,401,404].includes(httpStatus)) {
