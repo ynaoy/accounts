@@ -159,7 +159,8 @@ CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOWED_ORIGINS = env.get('TRUSTED_ORIGINS').split()
 # プリフライト(事前リクエスト)の設定、30分だけ許可
 CORS_PREFLIGHT_MAX_AGE = 60 * 30
-
+# アクセスを許可したいホスト名を追加
+ALLOWED_HOSTS = env.get('ALLOWED_HOSTS').split()
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
