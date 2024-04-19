@@ -14,7 +14,7 @@ const fetchResponseFromApi = async( url:string,
   // クッキーを取得
   const auth = getCookie('Authorization'); // 存在しなければundefined
   if(auth!=undefined){
-    params.headers['Authorization'] = auth
+    params.headers['Authorization'] = `${process.env.NEXT_PUBLIC_JWT_AUTH_HEADER_TYPES} ${auth}`
   }
 
   // Json形式でリクエストをする
