@@ -30,7 +30,7 @@ def get_jwt_and_set_cookie(user, response):
     """
     token = get_jwt(user)
     if(token):
-      response.set_cookie("Authorization", JWT_HEADER+" "+token["access"], httponly=True, max_age=datetime.timedelta(minutes=30))
+      response.set_cookie("Authorization", token['access'] , httponly=True, max_age=datetime.timedelta(minutes=30))
       response.set_cookie("refresh", token["refresh"], httponly=True, max_age=datetime.timedelta(days=14))
     return response
 
