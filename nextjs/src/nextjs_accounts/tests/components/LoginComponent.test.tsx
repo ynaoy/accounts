@@ -23,7 +23,7 @@ jest.mock("../../hooks/LoginFlgContext",
   })
 )
 
-const postToLoginApiMock = jest.fn().mockResolvedValue({ httpStatus: 201, statusText: "", data: {}})
+const postToLoginApiMock = jest.fn().mockResolvedValue({ httpStatus: 200, statusText: "", data: {}})
 //APIと通信するモジュールのモック
 jest.mock("../../hooks/useFetch",
   ()=>({...jest.requireActual("../../hooks/useFetch"),

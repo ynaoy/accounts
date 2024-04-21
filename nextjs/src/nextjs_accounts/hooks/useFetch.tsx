@@ -1,7 +1,8 @@
 import {  fetchLoginFlgReturnType, fetchParamsType, 
   postToSignupApiParamsType, postToSignupApiReturnType,
   postToLoginApiParamsType, postToLoginApiReturnType } from './types/useFetch.d'
-import { getCookie } from 'cookies-next';
+import { getCookie as getCookieOnClient } from 'cookies-next';
+import { cookies as getCookieOnServer} from 'next/headers'
 
 const fetchResponseFromApi = async( url:string, 
                                     params:fetchParamsType, 
@@ -27,6 +28,23 @@ const fetchResponseFromApi = async( url:string,
   // APIにリクエストを送ってレスポンスをもらう
   let response = await fetch(url, params)
   return response
+}
+
+const getCookie =(key:string)=>{
+  /**
+   * クライアントかサーバーそれぞれでの実行環境に合わせてクッキーを取得する
+   * @return { string|undefined }
+  */
+
+  // windowが使えればクライアント、そうでなければサーバー上でのクッキー取得
+  const isClient = (typeof window !== 'undefined') 
+  // クッキーを取得
+  if(isClient) { 
+    return getCookieOnClient(key)// 存在しなければundefined
+  }else{
+    const auth = getCookieOnServer().get(key)  // 存在しなければundefined
+    return auth? auth.value: undefined
+  }
 }
 
 export const useFetch = ()=> {
