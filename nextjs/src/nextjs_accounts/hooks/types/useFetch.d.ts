@@ -5,7 +5,7 @@ export type fetchParamsType = {
   body?:string,
 }
 
-type ApiReturnType = Promise<{ 
+type fetchReturnType = Promise<{ 
   httpStatus: number,
   statusText: string,
   data: {[key: string]: string[]}
@@ -13,19 +13,19 @@ type ApiReturnType = Promise<{
 
 export type fetchLoginFlgReturnType = ()=> Promise<{loginFlg:boolean}>
 
-export type postToSignupApiParamsType = {
+export type SignupParamsType = {
   username: string;
   email: string;
   password: string;
 }
 
-export type postToSignupApiReturnType = (params:postToSignupApiParamsType)=>
-  ApiReturnType
+export type SignupReturnType = (params:postToSignupApiParamsType)=>
+  fetchReturnType
 
-export type postToLoginApiParamsType = {
+export type LoginParamsType = {
   email: string;
   password: string;
 }
 
-export type postToLoginApiReturnType = (params:postToLoginApiParamsType)=>
-  ApiReturnType
+export type LoginReturnType = (params:postToLoginApiParamsType)=>
+  fetchReturnType

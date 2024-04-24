@@ -1,12 +1,12 @@
 import {  fetchLoginFlgReturnType, fetchParamsType, 
-  postToSignupApiParamsType, postToSignupApiReturnType,
-  postToLoginApiParamsType, postToLoginApiReturnType } from './types/useFetch.d'
+  SignupParamsType, SignupReturnType,
+  LoginParamsType, LoginReturnType } from './types/useFetch.d'
 import { getCookie as getCookieOnClient } from 'cookies-next';
 import { cookies as getCookieOnServer} from 'next/headers'
 
-const fetchResponseFromApi = async( url:string, 
-                                    params:fetchParamsType, 
-                                    data: Record<string, unknown> = {}) =>{
+const fetchResponse = async(url:string, 
+                            params:fetchParamsType, 
+                            data: Record<string, unknown> = {}) =>{
   /**
    * APIと通信する基本的な関数
    * @return { Response }
@@ -57,7 +57,7 @@ export const useFetch = ()=> {
   
     // APIにリクエストを送る
     try{
-      const response = await fetchResponseFromApi(
+      const response = await fetchResponse(
         `${process.env.NEXT_PUBLIC_API_ORIGIN}/api/is_login`,
         { method:'GET', headers: {}, credentials: 'include',} 
       )
@@ -69,7 +69,7 @@ export const useFetch = ()=> {
     }
   }
 
-  const postToSignupApi:postToSignupApiReturnType =async(data: postToSignupApiParamsType)=>{
+  const postToSignupApi:SignupReturnType =async(data: SignupParamsType)=>{
     /**
      * 外部APIのSignupパスにPOSTメソッドでリクエストを送る
      * @return {httpStatus: number, statusText: string, data: {[key:string]: string[]}}
@@ -77,7 +77,7 @@ export const useFetch = ()=> {
     
     // APIにリクエストを送る
     try{
-      const response = await fetchResponseFromApi(
+      const response = await fetchResponse(
       `${process.env.NEXT_PUBLIC_API_ORIGIN}/api/signup/`,
       { method:'POST', headers: {}, credentials: 'include', },
       data)
@@ -101,7 +101,7 @@ export const useFetch = ()=> {
     }
   }
 
-  const postToLoginApi:postToLoginApiReturnType =async(data: postToLoginApiParamsType)=>{
+  const postToLoginApi:LoginReturnType =async(data: LoginParamsType)=>{
     /**
      * 外部APIのloginパスにPOSTメソッドでリクエストを送る
      * @return {httpStatus: number, statusText: string, data: {[key:string]: string[]}}
@@ -109,7 +109,7 @@ export const useFetch = ()=> {
     
     // APIにリクエストを送る
     try{
-      const response = await fetchResponseFromApi(
+      const response = await fetchResponse(
       `${process.env.NEXT_PUBLIC_API_ORIGIN}/api/login/`,
       { method:'POST', headers: {}, credentials: 'include', },
       data)
