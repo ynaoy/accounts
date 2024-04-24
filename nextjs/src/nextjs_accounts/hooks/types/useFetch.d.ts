@@ -11,7 +11,7 @@ type fetchReturnType = Promise<{
   data: {[key: string]: string[]}
 }>
 
-export type fetchLoginFlgReturnType = ()=> Promise<{loginFlg:boolean}>
+export type fetchLoginFlgReturnType = ()=> fetchReturnType
 
 export type SignupParamsType = {
   username: string;

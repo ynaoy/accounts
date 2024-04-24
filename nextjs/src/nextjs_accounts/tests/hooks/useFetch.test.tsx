@@ -15,38 +15,75 @@ describe('useFetch', () => {
     jest.restoreAllMocks();
   })
 
-  test('fetchLoginFlgメソッドでリクエストに成功した際に、適切なオブジェクトが返されている', async () => {
+  test('fetchLoginFlgFromFrontendServerメソッドでリクエストに成功した際に、適切なオブジェクトが返されている', async () => {
     // fetchのモック
     global.fetch = jest.fn().mockImplementationOnce(() =>
       Promise.resolve({
         ok: true,
         status: 200,
-        json: () => Promise.resolve({ loginFlg: true }),
+        json: () => Promise.resolve({ httpStatus:200, statusText:"ok", data: {loginFlg: true} }),
       })
     )
     // useFetchの初期化
     const { result } = renderHook(() => useFetch());
 
-    // fetchLoginFlgを実行して結果をテスト
-    let response = await result.current.fetchLoginFlg()
-    expect(response).toEqual({ loginFlg: true })
+    // fetchLoginFlgFromFrontendServerを実行して結果をテスト
+    let response = await result.current.fetchLoginFlgFromFrontendServer()
+    expect(response).toEqual({ httpStatus:200, statusText:"ok", data: {loginFlg: true} })
   })
 
-  test('fetchLoginFlgメソッドでリクエストに失敗した際に、適切なオブジェクトが返されている', async () => {
+  test('fetchLoginFlgFromFrontendServerメソッドでリクエストに失敗した際に、適切なオブジェクトが返されている', async () => {
     // fetchのモック
     global.fetch = jest.fn().mockImplementationOnce(() =>
       Promise.resolve({
         ok: false,
         status: 500,
-        json: () => Promise.resolve({ loginFlg: false }),
       })
     )
     // useFetchの初期化
     const { result } = renderHook(() => useFetch());
 
-    // fetchLoginFlgを実行して結果をテスト
-    let response = await result.current.fetchLoginFlg()
-    expect(response).toEqual({ loginFlg: false })
+    // ffetchLoginFlgFromFrontendServerを実行して結果をテスト
+    let response = await result.current.fetchLoginFlgFromFrontendServer()
+    expect(response).toEqual({ data: {loginFlg: false, message: '予期せぬエラーが発生しました'}})
+  })
+
+  test('fetchLoginFlgFromBackendServerメソッドでリクエストに成功した際に、適切なオブジェクトが返されている', async () => {
+    // fetchのモック
+    global.fetch = jest.fn().mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: true,
+        status: 200,
+        statusText:"ok",
+        json: () => Promise.resolve({loginFlg: true}),
+      })
+    )
+    // useFetchの初期化
+    const { result } = renderHook(() => useFetch());
+
+    // fetchLoginFlgFromBackendServerを実行して結果をテスト
+    let response = await result.current.fetchLoginFlgFromBackendServer()
+    expect(response).toEqual({ httpStatus:200, statusText:"ok", data: {loginFlg: true} })
+  })
+
+  test('fetchLoginFlgFromBackendServerメソッドでリクエストに失敗した際に、適切なオブジェクトが返されている', async () => {
+    // fetchのモック
+    global.fetch = jest.fn().mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: false,
+        status: 500,
+      })
+    )
+    // useFetchの初期化
+    const { result } = renderHook(() => useFetch());
+
+    // fetchLoginFlgFromBackendServerを実行して結果をテスト
+    let response = await result.current.fetchLoginFlgFromBackendServer()
+    expect(response).toEqual({ 
+      httpStatus:500, 
+      statusText:'Internal Server Error',
+      data: {loginFlg: false, message: '予期せぬエラーが発生しました'}
+    })
   })
 
   test('postToSignupApiでリクエストに成功した際に、適切なオブジェクトが返されている', async () => {

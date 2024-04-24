@@ -6,8 +6,8 @@ import { useFetch } from '../../../../hooks/useFetch';
 
 export async function GET(req: NextRequest){
   // 外部APIと通信する関数を受け取る
-  const { fetchLoginFlg } = useFetch()
+  const { fetchLoginFlgFromBackendServer } = useFetch()
   // 外部APIからログイン状態を受け取る
-  const { loginFlg } = await fetchLoginFlg()
-  return NextResponse.json({ loginFlg: loginFlg })
+  const jsonData = await fetchLoginFlgFromBackendServer()
+  return NextResponse.json(jsonData)
 }

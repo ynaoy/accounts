@@ -49,23 +49,53 @@ const getCookie =(key:string)=>{
 
 export const useFetch = ()=> {
 
-  const fetchLoginFlg:fetchLoginFlgReturnType =async()=>{
+  const fetchLoginFlgFromFrontendServer:fetchLoginFlgReturnType =async()=>{
     /**
-     * 外部APIにリクエストを送ってからログイン状態を受け取る 
-     * @return {boolean} - ログイン状態を返す
+     * フロントエンドサーバーにリクエストを送って、ログイン状態を受け取る 
+     * @return {httpStatus: number, statusText: string, data: {[key:string]: string[]}}
     */
   
-    // APIにリクエストを送る
+    // フロントエンドサーバーにリクエストを送る
+    try{
+      const response = await fetchResponse(
+        'api/login/check',
+        { method:'GET', headers: {}, credentials: 'include',} 
+      )
+      return await response.json()
+  
+    } catch(error) {
+      console.error(error);
+      return { data: {loginFlg: false, message: '予期せぬエラーが発生しました'}}
+    }
+  }
+
+  const fetchLoginFlgFromBackendServer:fetchLoginFlgReturnType =async()=>{
+    /**
+     * バックエンドサーバーにリクエストを送って、ログイン状態を受け取る 
+     * @return {httpStatus: number, statusText: string, data: {[key:string]: string[]}}
+    */
+  
+    // バックエンドサーバーにリクエストを送る
     try{
       const response = await fetchResponse(
         `${process.env.NEXT_PUBLIC_API_ORIGIN}/api/is_login`,
         { method:'GET', headers: {}, credentials: 'include',} 
       )
-      return await response.json()// { loginFlg: {boolean}}
+      let ret = await response.json()// { loginFlg: {boolean}}
+      return {
+        httpStatus: response.status,
+        statusText: response.statusText,
+        data:ret
+      }
   
     } catch(error) {
       console.error(error);
-      return {loginFlg: false}
+      return { 
+        // 汎用的なエラーレスポンスを返す
+        httpStatus: 500,
+        statusText: 'Internal Server Error',
+        data: { loginFlg: false, message: '予期せぬエラーが発生しました' },
+      };
     }
   }
 
@@ -134,7 +164,8 @@ export const useFetch = ()=> {
   }
 
   return{
-    fetchLoginFlg,
+    fetchLoginFlgFromFrontendServer,
+    fetchLoginFlgFromBackendServer,
     postToSignupApi,
     postToLoginApi
   }
