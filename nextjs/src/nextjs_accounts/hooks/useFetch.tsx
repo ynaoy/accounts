@@ -99,13 +99,34 @@ export const useFetch = ()=> {
     }
   }
 
-  const postToSignupApi:SignupReturnType =async(data: SignupParamsType)=>{
+  const signupToFrontendServer:SignupReturnType =async(data: SignupParamsType)=>{
     /**
-     * 外部APIのSignupパスにPOSTメソッドでリクエストを送る
+     * フロントエンドサーバーにPOSTメソッドでリクエストを送る
      * @return {httpStatus: number, statusText: string, data: {[key:string]: string[]}}
     */
     
-    // APIにリクエストを送る
+    // フロントエンドサーバーにリクエストを送る
+    try{
+      const response = await fetchResponse('api/signup/', { method:'POST', headers: {}, credentials: 'include', }, data )
+      return await response.json()
+
+    } catch(error) {
+      return { 
+        // 汎用的なエラーレスポンスを返す
+        httpStatus: 500,
+        statusText: 'Internal Server Error',
+        data: { message: '予期せぬエラーが発生しました' },
+      };
+    }
+  }
+
+  const signupToBackendServer:SignupReturnType =async(data: SignupParamsType)=>{
+    /**
+     * バックエンドサーバーにPOSTメソッドでリクエストを送る
+     * @return {httpStatus: number, statusText: string, data: {[key:string]: string[]}}
+    */
+    
+    // バックエンドサーバーにリクエストを送る
     try{
       const response = await fetchResponse(
       `${process.env.NEXT_PUBLIC_API_ORIGIN}/api/signup/`,
@@ -120,6 +141,7 @@ export const useFetch = ()=> {
         statusText: response.statusText,
         data: ret
       }    
+
     } catch(error) {
       console.error('Undefind Error:', error);
       return { 
@@ -166,7 +188,8 @@ export const useFetch = ()=> {
   return{
     fetchLoginFlgFromFrontendServer,
     fetchLoginFlgFromBackendServer,
-    postToSignupApi,
+    signupToFrontendServer,
+    signupToBackendServer,
     postToLoginApi
   }
 }

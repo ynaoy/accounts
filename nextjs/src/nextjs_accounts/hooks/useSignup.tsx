@@ -10,7 +10,7 @@ export const useSignup = () => {
   // ページ遷移を管理するルーター
   const { redirectToIndexPage } = useCustomRouter()
   // APIと通信する関数を受け取る
-  const { postToSignupApi } = useFetch()
+  const { SignupToBackendServer } = useFetch()
   // ログイン状態と更新関数をコンテキストから取得する 
   const loginFlg = useLoginFlgContext();
   const setLoginFlg = useSetLoginFlgContext()
@@ -52,7 +52,7 @@ export const useSignup = () => {
     if (!validateForm()) return;
     try {
       // バックエンドAPIにフォームをPOSTしてレスポンスを受け取る
-      let {httpStatus, statusText, data } = await postToSignupApi(
+      let {httpStatus, statusText, data } = await SignupToBackendServer(
         { 'username': formState['userName'], // バックエンドではparamsのキーがuser"N"ameではなくuser"n"ame
           'email': formState['email'],
           'password': formState['password'],

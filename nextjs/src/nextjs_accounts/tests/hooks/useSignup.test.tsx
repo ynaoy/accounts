@@ -21,12 +21,12 @@ jest.mock('../../hooks/LoginFlgContext',
   })
 )
 
-const postToSignupApiMock = jest.fn().mockResolvedValue({ httpStatus: 201, statusText: "", data: {}})
+const signupToBackendServerMock = jest.fn().mockResolvedValue({ httpStatus: 201, statusText: "", data: {}})
 //APIと通信するモジュールのモック
 jest.mock('../../hooks/useFetch',
   ()=>({...jest.requireActual('../../hooks/useFetch'),
     useFetch: ()=>{
-      return { postToSignupApi : async()=>postToSignupApiMock() }
+      return { signupToBackendServer : async()=>signupToBackendServerMock() }
     }
   })
 )
@@ -53,7 +53,7 @@ describe('useSignup', () => {
     expect(result.current.validationStates.emailValidations).toContain('メールアドレスを入力してください')
     expect(result.current.validationStates.passwordValidations).toContain('パスワードを入力してください')
     // バリデーションが通らずにAPIと通信する関数が呼び出されていない
-    expect(postToSignupApiMock).not.toHaveBeenCalled()
+    expect(signupToBackendServerMock).not.toHaveBeenCalled()
     // ログイン状態を変更する関数が呼び出されていない
     expect(setLoginFlgMock).not.toHaveBeenCalled()
     // router.pushメソッドが呼び出されていない
@@ -72,7 +72,7 @@ describe('useSignup', () => {
       result.current.registerUser();
     })
     // APIと通信する関数が呼び出されている
-    expect(postToSignupApiMock).toHaveBeenCalled()
+    expect(signupToBackendServerMock).toHaveBeenCalled()
     // ログイン状態を変更する関数が呼び出されている
     expect(setLoginFlgMock).toHaveBeenCalled()
     // router.pushメソッドが呼び出されている
@@ -81,7 +81,7 @@ describe('useSignup', () => {
 
   test('APIでバリデーションに関するエラーが起こった時に、カスタムフックの持つバリデーションの値が更新される',async()=>{
     // APIから受け取る値を変更
-    postToSignupApiMock.mockResolvedValue({ 
+    signupToBackendServerMock.mockResolvedValue({ 
       httpStatus:409, 
       statusText:'conflict',
       data: {username:['無効なユーザーネームです'], email:['無効なメールアドレスです'],password: ['無効なパスワードです']}
@@ -102,7 +102,7 @@ describe('useSignup', () => {
     expect(result.current.validationStates.passwordValidations).toContain('無効なパスワードです')
 
     // APIと通信する関数が呼び出されている
-    expect(postToSignupApiMock).toHaveBeenCalled()
+    expect(signupToBackendServerMock).toHaveBeenCalled()
     // ログイン状態を変更する関数が呼び出されていない
     expect(setLoginFlgMock).not.toHaveBeenCalled()
     // router.pushメソッドが呼び出されていない
