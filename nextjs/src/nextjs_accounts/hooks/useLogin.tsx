@@ -10,7 +10,7 @@ export const useLogin = () => {
   // ページ遷移を管理するルーター
   const { redirectToIndexPage } = useCustomRouter()
   // APIと通信する関数を受け取る
-  const { postToLoginApi } = useFetch()
+  const { loginToBackendServer } = useFetch()
   // ログイン状態と更新関数をコンテキストから取得する 
   const loginFlg = useLoginFlgContext();
   const setLoginFlg = useSetLoginFlgContext()
@@ -52,7 +52,7 @@ export const useLogin = () => {
     if (!validateForm()) return;
     try {
       // バックエンドAPIにフォームをPOSTしてレスポンスを受け取る
-      let {httpStatus, statusText, data } = await postToLoginApi(
+      let {httpStatus, statusText, data } = await loginToBackendServer(
         { 'email': formState['email'], 'password': formState['password'] })
       if(httpStatus == 200){
         // ログインに成功した場合、ログイン状態を更新してリダイレクト

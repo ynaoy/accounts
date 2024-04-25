@@ -21,12 +21,12 @@ jest.mock('../../hooks/LoginFlgContext',
   })
 )
 
-const postToLoginApiMock = jest.fn().mockResolvedValue({ httpStatus: 200, statusText: "", data: {}})
+const loginToBackendServerMock = jest.fn().mockResolvedValue({ httpStatus: 200, statusText: "", data: {}})
 //APIと通信するモジュールのモック
 jest.mock('../../hooks/useFetch',
   ()=>({...jest.requireActual('../../hooks/useFetch'),
     useFetch: ()=>{
-      return { postToLoginApi : async()=>postToLoginApiMock() }
+      return { loginToBackendServer : async()=>loginToBackendServerMock() }
     }
   })
 )
@@ -51,7 +51,7 @@ describe('useLogin', () => {
     expect(result.current.validationStates.emailValidations).toContain('メールアドレスを入力してください')
     expect(result.current.validationStates.passwordValidations).toContain('パスワードを入力してください')
     // バリデーションが通らずにAPIと通信する関数が呼び出されていない
-    expect(postToLoginApiMock).not.toHaveBeenCalled()
+    expect(loginToBackendServerMock).not.toHaveBeenCalled()
     // ログイン状態を変更する関数が呼び出されていない
     expect(setLoginFlgMock).not.toHaveBeenCalled()
     // router.pushメソッドが呼び出されていない
@@ -69,7 +69,7 @@ describe('useLogin', () => {
       result.current.loginUser();
     })
     // APIと通信する関数が呼び出されている
-    expect(postToLoginApiMock).toHaveBeenCalled()
+    expect(loginToBackendServerMock).toHaveBeenCalled()
     // ログイン状態を変更する関数が呼び出されている
     expect(setLoginFlgMock).toHaveBeenCalled()
     // router.pushメソッドが呼び出されている
@@ -78,7 +78,7 @@ describe('useLogin', () => {
 
   test('APIから401エラーが帰ってきた時に、カスタムフックの持つバリデーションの値が更新される',async()=>{
     // APIから受け取る値を変更
-    postToLoginApiMock.mockResolvedValue({ 
+    loginToBackendServerMock.mockResolvedValue({ 
       httpStatus:401, 
       statusText:'',
       data: { password: ['パスワードが間違っています']}
@@ -96,7 +96,7 @@ describe('useLogin', () => {
     expect(result.current.validationStates.passwordValidations).toContain('パスワードが間違っています')
 
     // APIと通信する関数が呼び出されている
-    expect(postToLoginApiMock).toHaveBeenCalled()
+    expect(loginToBackendServerMock).toHaveBeenCalled()
     // ログイン状態を変更する関数が呼び出されていない
     expect(setLoginFlgMock).not.toHaveBeenCalled()
     // router.pushメソッドが呼び出されていない
@@ -105,7 +105,7 @@ describe('useLogin', () => {
 
   test('APIから404エラーが返ってきた時に、カスタムフックの持つバリデーションの値が更新される',async()=>{
     // APIから受け取る値を変更
-    postToLoginApiMock.mockResolvedValue({ 
+    loginToBackendServerMock.mockResolvedValue({ 
       httpStatus:404, 
       statusText:'',
       data: { email: ['メールアドレスが間違っています']}
@@ -123,7 +123,7 @@ describe('useLogin', () => {
     expect(result.current.validationStates.emailValidations).toContain('メールアドレスが間違っています')
 
     // APIと通信する関数が呼び出されている
-    expect(postToLoginApiMock).toHaveBeenCalled()
+    expect(loginToBackendServerMock).toHaveBeenCalled()
     // ログイン状態を変更する関数が呼び出されていない
     expect(setLoginFlgMock).not.toHaveBeenCalled()
     // router.pushメソッドが呼び出されていない

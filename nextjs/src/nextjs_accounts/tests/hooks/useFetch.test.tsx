@@ -164,26 +164,29 @@ describe('useFetch', () => {
                                data: { message: '予期せぬエラーが発生しました' }})
   })
 
-  test('postToLoginApiでリクエストに成功した際に、適切なオブジェクトが返されている', async () => {
+  test('loginToFrontendServerでリクエストに成功した際に、適切なオブジェクトが返されている', async () => {
     // fetchのモック
     global.fetch = jest.fn().mockImplementationOnce(() =>
       Promise.resolve({
         ok: true,
-        status: 201,
+        status: 200,
         statusText: 'OK',
-        json: () => Promise.resolve({ message: 'Success' }),
+        json: () => Promise.resolve({
+          httpStatus: 200, 
+          statusText: 'OK', 
+          data: { message: 'Success' }}),
       })
     );
     // useFetchの初期化
     const { result } = renderHook(() => useFetch());
 
-    // postToLoginApiを実行して結果をテスト
-    let response = await result.current.postToLoginApi({ email:'testemail@examplecom', 
-                                                          password: 'password' })
-    expect(response).toEqual({ httpStatus: 201, statusText: 'OK', data: { message: 'Success' } })
+    // loginToFrontendServerを実行して結果をテスト
+    let response = await result.current.loginToFrontendServer({ email:'testemail@examplecom', 
+                                                               password: 'password' })
+    expect(response).toEqual({ httpStatus: 200, statusText: 'OK', data: { message: 'Success' } })
   })
 
-  test('postToLoginApiでリクエストに失敗した際に、適切なオブジェクトが返されている', async () => {
+  test('loginToFrontendServerでリクエストに失敗した際に、適切なオブジェクトが返されている', async () => {
     // fetchのモック
     global.fetch = jest.fn().mockImplementationOnce(() =>
       Promise.resolve({
@@ -195,8 +198,46 @@ describe('useFetch', () => {
     // useFetchの初期化
     const { result } = renderHook(() => useFetch())
 
-    // postToLoginApiを実行して結果をテスト
-    let response = await result.current.postToLoginApi({ email:'', password: '' })
+    // loginToFrontendServerを実行して結果をテスト
+    let response = await result.current.loginToFrontendServer({ email:'', password: '' })
+    expect(response).toEqual({ httpStatus: 500, 
+                               statusText: 'Internal Server Error', 
+                               data: { message: '予期せぬエラーが発生しました' }})
+  })
+
+  test('loginToBackendServerでリクエストに成功した際に、適切なオブジェクトが返されている', async () => {
+    // fetchのモック
+    global.fetch = jest.fn().mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        json: () => Promise.resolve({ message: 'Success' }),
+      })
+    );
+    // useFetchの初期化
+    const { result } = renderHook(() => useFetch());
+
+    // loginToBackendServerを実行して結果をテスト
+    let response = await result.current.loginToBackendServer({ email:'testemail@examplecom', 
+                                                               password: 'password' })
+    expect(response).toEqual({ httpStatus: 200, statusText: 'OK', data: { message: 'Success' } })
+  })
+
+  test('loginToBackendServerでリクエストに失敗した際に、適切なオブジェクトが返されている', async () => {
+    // fetchのモック
+    global.fetch = jest.fn().mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: false,
+        status: 500,
+        statusText: 'Internal Server Error',
+      })
+    )
+    // useFetchの初期化
+    const { result } = renderHook(() => useFetch())
+
+    // loginToBackendServerを実行して結果をテスト
+    let response = await result.current.loginToBackendServer({ email:'', password: '' })
     expect(response).toEqual({ httpStatus: 500, 
                                statusText: 'Internal Server Error', 
                                data: { message: '予期せぬエラーが発生しました' }})

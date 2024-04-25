@@ -23,12 +23,12 @@ jest.mock("../../hooks/LoginFlgContext",
   })
 )
 
-const postToLoginApiMock = jest.fn().mockResolvedValue({ httpStatus: 200, statusText: "", data: {}})
+const loginToBackendServerMock = jest.fn().mockResolvedValue({ httpStatus: 200, statusText: "", data: {}})
 //APIと通信するモジュールのモック
 jest.mock("../../hooks/useFetch",
   ()=>({...jest.requireActual("../../hooks/useFetch"),
     useFetch: ()=>{
-      return { postToLoginApi : async()=>postToLoginApiMock() }
+      return { loginToBackendServer : async()=>loginToBackendServerMock() }
     }
   })
 )
@@ -76,7 +76,7 @@ describe("LoginComponent", ()=>{
     await user.click(button)
     
     //APIと通信する関数が呼び出されている
-    expect(postToLoginApiMock).toHaveBeenCalled()
+    expect(loginToBackendServerMock).toHaveBeenCalled()
     //ログイン状態を変更する関数が呼び出されている
     expect(setLoginFlgMock).toHaveBeenCalled()
     // router.pushメソッドが呼び出されている
@@ -111,7 +111,7 @@ describe("LoginComponent", ()=>{
     expect(screen.getByText("パスワードを入力してください")).toBeTruthy()
 
     //バリデーションが通らずにAPIと通信する関数が呼び出されていない
-    expect(postToLoginApiMock).not.toHaveBeenCalled()
+    expect(loginToBackendServerMock).not.toHaveBeenCalled()
     //ログイン状態を変更する関数が呼び出されていない
     expect(setLoginFlgMock).not.toHaveBeenCalled()
     // router.pushメソッドが呼び出されていない
@@ -121,7 +121,7 @@ describe("LoginComponent", ()=>{
   test(`API側でバリデーションエラーがあった場合、
         バリデーション部分のUIが更新され、ログイン状態が変更されない`, async() => {
     
-    postToLoginApiMock.mockResolvedValue({ 
+          loginToBackendServerMock.mockResolvedValue({ 
       httpStatus:400, 
       statusText:"",
       data: { email:["メールアドレスを入力してください"],password: ["パスワードを入力してください"]}
@@ -156,7 +156,7 @@ describe("LoginComponent", ()=>{
     expect(screen.getByText("パスワードを入力してください")).toBeTruthy()
 
     //APIと通信する関数が呼び出されている
-    expect(postToLoginApiMock).toHaveBeenCalled()
+    expect(loginToBackendServerMock).toHaveBeenCalled()
     //ログイン状態を変更する関数が呼び出されていない
     expect(setLoginFlgMock).not.toHaveBeenCalled()
     // router.pushメソッドが呼び出されていない

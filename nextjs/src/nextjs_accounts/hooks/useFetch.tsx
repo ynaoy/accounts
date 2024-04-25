@@ -153,9 +153,32 @@ export const useFetch = ()=> {
     }
   }
 
-  const postToLoginApi:LoginReturnType =async(data: LoginParamsType)=>{
+  const loginToFrontendServer:LoginReturnType =async(data: LoginParamsType)=>{
     /**
-     * 外部APIのloginパスにPOSTメソッドでリクエストを送る
+     * フロントエンドサーバーにPOSTメソッドでリクエストを送る
+     * @return {httpStatus: number, statusText: string, data: {[key:string]: string[]}}
+    */
+    
+    // APIにリクエストを送る
+    try{
+      const response = await fetchResponse(
+      'api/login/',
+      { method:'POST', headers: {}, credentials: 'include', },
+      data)
+      return await response.json()
+    } catch(error) {
+      console.error('Undefind Error:', error);
+      return { 
+        // 汎用的なエラーレスポンスを返す
+        httpStatus: 500,
+        statusText: 'Internal Server Error',
+        data: { message: '予期せぬエラーが発生しました' },
+      };
+    }
+  }
+  const loginToBackendServer:LoginReturnType =async(data: LoginParamsType)=>{
+    /**
+     * バックエンドサーバーにPOSTメソッドでリクエストを送る
      * @return {httpStatus: number, statusText: string, data: {[key:string]: string[]}}
     */
     
@@ -190,6 +213,7 @@ export const useFetch = ()=> {
     fetchLoginFlgFromBackendServer,
     signupToFrontendServer,
     signupToBackendServer,
-    postToLoginApi
+    loginToFrontendServer,
+    loginToBackendServer
   }
 }
