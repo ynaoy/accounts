@@ -3,8 +3,10 @@
  * 画面の遷移時に再レンダーされない
  */
 import './globals.css'
+import 'tailwindcss/tailwind.css'
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'
+import ContextProvider from '../components/ContextProvider'
 
 const inter = Inter({ subsets: ['latin'] })
 export const metadata: Metadata = {
@@ -16,7 +18,9 @@ export default async function RootLayout({children,}:{children: React.ReactNode,
   return (
     <html lang="en">
       <body className={inter.className}>
-        {children}
+        <ContextProvider>
+          {children}
+        </ContextProvider>
       </body>
     </html>
   )
