@@ -23,12 +23,12 @@ jest.mock('../../hooks/LoginFlgContext',
   })
 )
 
-const signupToBackendServerMock = jest.fn().mockResolvedValue({ httpStatus: 201, statusText: "", data: {}})
+const signupToFrontendServerMock = jest.fn().mockResolvedValue({ httpStatus: 201, statusText: "", data: {}})
 //APIと通信するモジュールのモック
 jest.mock('../../hooks/useFetch',
   ()=>({...jest.requireActual('../../hooks/useFetch'),
     useFetch: ()=>{
-      return { signupToBackendServer : async()=>signupToBackendServerMock() }
+      return { signupToFrontendServer : async()=>signupToFrontendServerMock() }
     }
   })
 )
@@ -79,7 +79,7 @@ describe('SignupComponent', ()=>{
     await user.click(button)
     
     //APIと通信する関数が呼び出されている
-    expect(signupToBackendServerMock).toHaveBeenCalled()
+    expect(signupToFrontendServerMock).toHaveBeenCalled()
     //ログイン状態を変更する関数が呼び出されている
     expect(setLoginFlgMock).toHaveBeenCalled()
     // router.pushメソッドが呼び出されている
@@ -117,7 +117,7 @@ describe('SignupComponent', ()=>{
     expect(screen.getByText("パスワードを入力してください")).toBeTruthy()
 
     //バリデーションが通らずにAPIと通信する関数が呼び出されていない
-    expect(signupToBackendServerMock).not.toHaveBeenCalled()
+    expect(signupToFrontendServerMock).not.toHaveBeenCalled()
     //ログイン状態を変更する関数が呼び出されていない
     expect(setLoginFlgMock).not.toHaveBeenCalled()
     // router.pushメソッドが呼び出されていない
@@ -127,7 +127,7 @@ describe('SignupComponent', ()=>{
   test(`API側でバリデーションエラーがあった場合、
         バリデーション部分のUIが更新され、ログイン状態が変更されない`, async() => {
     
-    signupToBackendServerMock.mockResolvedValue({ 
+          signupToFrontendServerMock.mockResolvedValue({ 
       httpStatus:409, 
       statusText:'conflict',
       data: {username:['無効なユーザーネームです'], email:['無効なメールアドレスです'],password: ['無効なパスワードです']}
@@ -166,7 +166,7 @@ describe('SignupComponent', ()=>{
     expect(screen.getByText("無効なパスワードです")).toBeTruthy()
 
     //APIと通信する関数が呼び出されている
-    expect(signupToBackendServerMock).toHaveBeenCalled()
+    expect(signupToFrontendServerMock).toHaveBeenCalled()
     //ログイン状態を変更する関数が呼び出されていない
     expect(setLoginFlgMock).not.toHaveBeenCalled()
     // router.pushメソッドが呼び出されていない
