@@ -69,14 +69,13 @@ class UserSerializer(serializers.ModelSerializer):
      新しいUserインスタンスの作成。
      継承元のsaveメソッドを使うと、勝手にcreateかupdateメソッドのどちらかを実行してくれる
     """
-    return User.objects.create_user(**validated_data)
+    return super().create(validated_data)
   
   def update(self, instance, validated_data):
     """
      既存のUserインスタンスの更新。
     """
-    instance.update_user(validated_data)
-    return instance
+    return super().update(instance, validated_data)
   
   def is_valid(self, valid_fields=(), **kwargs):
     """
