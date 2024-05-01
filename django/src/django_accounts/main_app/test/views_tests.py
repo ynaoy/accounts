@@ -145,7 +145,7 @@ class SignupViewTests(TestCase):
                                 post_data,
                                 content_type=self.content_type)
     # 409エラーが返ってくる
-    self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+    self.assertEqual(response.status_code, 409)
     # カスタムエラーメッセージが適用されている
     self.assertTrue(response.content.decode().find("[このユーザーネームは既に使用されています]"))
     # クッキーにアクセストークンとリフレッシュトークンが存在しない
@@ -170,7 +170,7 @@ class SignupViewTests(TestCase):
                                 content_type=self.content_type)
 
     # 409エラーが返ってくる
-    self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+    self.assertEqual(response.status_code, 409)
     # カスタムエラーメッセージが適用されている
     self.assertTrue(response.content.decode().find("[このメールアドレスは既に使用されています]"))
     # クッキーにアクセストークンとリフレッシュトークンが存在しない
@@ -188,7 +188,7 @@ class SignupViewTests(TestCase):
                                 content_type=self.content_type)
     
     # 400エラーが返ってくる
-    self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+    self.assertEqual(response.status_code, 400)
     # カスタムエラーメッセージが適用されている
     self.assertTrue(response.content.decode().find("[ユーザーネームは必須です]"))
     self.assertTrue(response.content.decode().find("[メールアドレスは必須です]"))
@@ -212,7 +212,7 @@ class LoginViewTests(TestCase):
     response = self.client.post(self.login_url,
                                 { "email": test_user.email,
                                   "password": "password"},
-                                content_type="application/json")
+                                content_type=self.content_type)
     # ログインに成功している
     self.assertEqual(response.status_code, 200)
     # クッキーにアクセストークンとリフレッシュトークンが存在する
@@ -228,7 +228,7 @@ class LoginViewTests(TestCase):
     response = self.client.post(self.login_url,
                                 { "email": "",
                                   "password": ""},
-                                content_type="application/json")
+                                content_type=self.content_type)
     # 400エラーが返ってくる
     self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
     # カスタムエラーメッセージが適用されている
@@ -245,7 +245,7 @@ class LoginViewTests(TestCase):
     response = self.client.post(self.login_url,
                                 { "email": test_user.email,
                                   "password": "ivalid_password"},
-                                content_type="application/json")
+                                content_type=self.content_type)
     # 401エラーが返ってくる
     self.assertEqual(response.status_code, 401)
     self.assertTrue(response.content.decode().find("[パスワードが間違っています]"))
@@ -260,7 +260,7 @@ class LoginViewTests(TestCase):
     response = self.client.post(self.login_url,
                                 { "email": "invalidexample@example.com",
                                   "password": "password"},
-                                content_type="application/json")
+                                content_type=self.content_type)
     # 401エラーが返ってくる
     self.assertEqual(response.status_code, 404)
     self.assertTrue(response.content.decode().find("[メールアドレスが間違っています]"))
@@ -277,7 +277,7 @@ class LoginViewTests(TestCase):
                                 { "email": test_user.email,
                                   "password": "password"},
                                 headers=headers,
-                                content_type="application/json")
+                                content_type=self.content_type)
     # 403エラーが返ってくる
     self.assertEqual(response.status_code, 403)
     # クッキーが空
@@ -295,10 +295,90 @@ class LoginViewTests(TestCase):
                                 content_type=self.content_type)
     
     # 400エラーが返ってくる
-    self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+    self.assertEqual(response.status_code, 400)
     # カスタムエラーメッセージが適用されている
     self.assertTrue(response.content.decode().find("[メールアドレスは必須です]"))
     self.assertTrue(response.content.decode().find("[パスワードは必須です]"))
     # クッキーにアクセストークンとリフレッシュトークンが存在しない
     self.assertFalse("Authorization" in response.cookies)
     self.assertFalse("refresh" in response.cookies)
+
+class UpdateViewTests(TestCase):
+
+  def setUp(self):
+    self.content_type = "application/json"
+
+  def test_update_view_patch_with_valid_params_and_login(self):
+    """
+    ログイン時に適切なパラメータでupdate_viewにPATCHメソッドを送ったときにステータスコード200が返ってきて、
+    ユーザーネームとパスワードが変更されている
+    """
+    test_user = create_default_user()
+    headers = create_jwt_headers(test_user)
+    response = self.client.patch(reverse("main_app:update", args=[test_user.pk]),
+                                { "username": "Changed User",
+                                  "email": "changedemail@example.com"},
+                                content_type=self.content_type,
+                                headers = headers)
+    # ステータス200が返ってくる
+    self.assertEqual(response.status_code, 200)
+    # ユーザーネームとパスワードが変わっている
+    test_user = User.objects.get(pk=test_user.pk) # 再度ユーザーオブジェクトを取得
+    self.assertEqual(test_user.username, "Changed User")
+    self.assertEqual(test_user.email, "changedemail@example.com")
+
+  def test_update_view_patch_with_valid_params_and_not_login(self):
+    """
+    非ログイン時に適切なパラメータでupdate_viewにPATCHメソッドを送ったときに
+    ユーザーの情報が更新されず、401エラーが返ってくる
+    """
+    test_user = create_default_user()
+    response = self.client.patch(reverse("main_app:update", args=[test_user.pk]),
+                                { "username":"Changed User",
+                                  "email":"changedemail@example.com"},
+                                content_type=self.content_type)
+    self.assertEqual(response.status_code, 401)
+    # ユーザーネームとパスワードが変わっていない
+    test_user = User.objects.get(pk=test_user.pk) # 再度ユーザーオブジェクトを取得
+    self.assertNotEqual(test_user.username, "Changed User")
+    self.assertNotEqual(test_user.email, "changedemail@example.com")
+
+  def test_update_view_patch_with_not_my_path(self):
+    """
+    ログイン時に間違ったPKのパスにPATCHメソッドを送ったときに
+    ユーザーの情報が更新されず、403エラーが返ってくる
+    """
+    test_user = create_default_user()
+    headers = create_jwt_headers(test_user)
+    another_user = create_default_user(username="another_user", email="anotheremail@example.com")
+    response = self.client.patch(reverse("main_app:update", args=[another_user.pk]),
+                                { "username":"Changed User",
+                                  "email":"changedemail@example.com"},
+                                content_type=self.content_type,
+                                headers = headers)
+    self.assertEqual(response.status_code, 403)
+    # ユーザーネームとパスワードが変わっていない
+    test_user = User.objects.get(pk=test_user.pk) # 再度ユーザーオブジェクトを取得
+    self.assertNotEqual(test_user.username, "Changed User")
+    self.assertNotEqual(test_user.email, "changedemail@example.com")
+
+  def test_update_view_patch_with_not_valid_params(self):
+    """
+    ログイン時に無効なパラメータでupdate_viewにPATCHメソッドを送ったときに
+    ユーザーの情報が更新されず、409エラーが返ってくる
+    """
+    test_user = create_default_user()
+    headers = create_jwt_headers(test_user)
+    another_user = create_default_user(username="another_user", email="anotheremail@example.com")
+    response = self.client.patch(reverse("main_app:update", args=[test_user.pk]),
+                                { "username":another_user.username,
+                                  "email":another_user.email},
+                                content_type=self.content_type,
+                                headers = headers)
+    self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
+    # ユーザーネームとパスワードが変わっていない
+    test_user = User.objects.get(pk=test_user.pk) # 再度ユーザーオブジェクトを取得
+    self.assertNotEqual(test_user.username, another_user.username)
+    self.assertNotEqual(test_user.email, another_user.email)
+    self.assertTrue(response.content.decode().find("[このユーザーネームは既に使用されています]"))
+    self.assertTrue(response.content.decode().find("[このメールアドレスは既に使用されています]"))
