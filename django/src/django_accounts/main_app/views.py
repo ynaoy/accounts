@@ -5,7 +5,7 @@ from rest_framework.generics import RetrieveAPIView, ListAPIView, CreateAPIView,
 from rest_framework.response import Response
 from .serializer import UserSerializer, username_unique_validator, email_unique_validator
 from .models import User
-from .permissions import OnlyLogoutPerm
+from .permissions import OnlyLogoutPerm, OnlyYouPerm
 from .utils import get_jwt_and_set_cookie, verify_jwt
 
 class IsLoginView(RetrieveAPIView):
@@ -111,3 +111,43 @@ class LoginView(CreateAPIView):
       print(e)
       return Response({"error": "予期せぬエラーが発生しました。"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
     
+class UpdateView(UpdateAPIView):
+  """
+  ユーザー更新用ビュー  
+  """
+  permission_classes = (IsAuthenticated, OnlyYouPerm,)
+  queryset = User.objects.all()
+  serializer_class = UserSerializer
+  valid_fields = ("username", "email")
+
+  def get_serializer_context(self):
+    context = super().get_serializer_context()
+    context["custom_validators"] = {
+      "username": [username_unique_validator],
+      "email": [email_unique_validator]
+    }
+    return context
+  
+  def patch(self, request, format=None, *args, **kwargs):
+    try:
+      serializer = self.serializer_class(data=request.data, context=self.get_serializer_context(), instance=request.user)
+      # バリデーションチェック
+      if serializer.is_valid(valid_fields=self.valid_fields):
+        # ユーザー更新
+        user = serializer.save()  # Userseriarizerのupdateメソッドが呼び出される
+        # jwtを発行してクッキーにセットする。そのレスポンスを返す
+        response = Response(serializer.validated_data, status=status.HTTP_200_OK)
+        responce = get_jwt_and_set_cookie(user, response)
+        return responce
+      
+      # バリデーションエラーの場合
+      else: 
+        # 二次元配列を一次元にして、バリデーションに引っかかった理由を抽出してるだけ
+        validation_code_1d = [error_node.code for _ in  serializer.errors.values() for error_node in _ ]
+        # バリデーションの理由によってHTTPステータスを管理
+        http_status = status.HTTP_409_CONFLICT if validation_code_1d.count("unique") else status.HTTP_400_BAD_REQUEST
+        return Response(serializer.errors, status=http_status)
+    
+    # その他の予期せぬエラーが発生した場合
+    except Exception as e:
+      return Response({"error": "予期せぬエラーが発生しました。"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
