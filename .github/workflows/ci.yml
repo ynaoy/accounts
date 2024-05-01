@@ -30,6 +30,7 @@ jobs:
         TRUSTED_ORIGINS: ${{ secrets.TRUSTED_ORIGINS }}
         JWT_ALGORITHM: ${{ secrets.JWT_ALGORITHM }}
         JWT_AUTH_HEADER_TYPES: ${{ secrets.JWT_AUTH_HEADER_TYPES }}
+        ALLOWED_HOSTS: ${{ secrets.ALLOWED_HOSTS }}
     
     steps: 
       - uses: actions/checkout@v4 #レポジトリ内のコードにアクセスできるようにする
@@ -53,6 +54,8 @@ jobs:
         - 3000:3000
       env:
         NEXT_PUBLIC_API_ORIGIN: ${{ secrets.NEXT_PUBLIC_API_ORIGIN }}
+        NEXT_PUBLIC_MY_ORIGIN: ${{ secrets.NEXT_PUBLIC_MY_ORIGIN }}
+        NEXT_PUBLIC_JWT_AUTH_HEADER_TYPES: ${{ secrets. NEXT_PUBLIC_JWT_AUTH_HEADER_TYPES }}
     
     steps: 
       - uses: actions/checkout@v4 #レポジトリ内のコードにアクセスできるようにする
