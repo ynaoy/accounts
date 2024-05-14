@@ -327,6 +327,25 @@ class UpdateViewTests(TestCase):
     self.assertEqual(test_user.username, "Changed User")
     self.assertEqual(test_user.email, "changedemail@example.com")
 
+  def test_update_view_patch_with_same_params_and_login(self):
+    """
+    ログインしているユーザーと同じusername,passwrordのparamsでupdate_viewにPATCHメソッドを送ったときに
+    ステータスコード200が返ってきて、ユーザーネームとパスワードが変わっていない(update時のカスタムバリデーションのテスト)
+    """
+    test_user = create_default_user()
+    headers = create_jwt_headers(test_user)
+    response = self.client.patch(reverse("main_app:update", args=[test_user.pk]),
+                                { "username": "Test User",
+                                  "email": "example@example.com"},
+                                content_type=self.content_type,
+                                headers = headers)
+    # ステータス200が返ってくる
+    self.assertEqual(response.status_code, 200)
+    # ユーザーネームとパスワードが変わっている
+    test_user = User.objects.get(pk=test_user.pk) # 再度ユーザーオブジェクトを取得
+    self.assertEqual(test_user.username, "Test User")
+    self.assertEqual(test_user.email, "example@example.com")
+
   def test_update_view_patch_with_valid_params_and_not_login(self):
     """
     非ログイン時に適切なパラメータでupdate_viewにPATCHメソッドを送ったときに
@@ -382,3 +401,33 @@ class UpdateViewTests(TestCase):
     self.assertNotEqual(test_user.email, another_user.email)
     self.assertTrue(response.content.decode().find("[このユーザーネームは既に使用されています]"))
     self.assertTrue(response.content.decode().find("[このメールアドレスは既に使用されています]"))
+
+class JWTUserIDRetrievalViewTests(TestCase):
+
+  def setUp(self):
+    self.user_id_url = reverse("main_app:my_id")
+    self.content_type = "application/json"
+
+  def test_JWT_userID_retrieval_view_get_with_login(self):
+    """
+    ログイン時にJWT_userID_retrieval_viewにGETメソッドを送ったときにステータスコード200とユーザーIDが返ってくる
+    """
+    test_user = create_default_user()
+    headers = create_jwt_headers(test_user)
+    response = self.client.get(self.user_id_url,
+                                content_type=self.content_type,
+                                headers = headers)
+    # ステータス200が返ってくる
+    self.assertEqual(response.status_code, 200)
+    # ユーザーIDが返ってくる
+    self.assertTrue(response.content.decode().find(str(test_user.pk)))
+
+  def test_JWT_userID_retrieval_view_get_with_not_login(self):
+    """
+    非ログイン時にJWT_userID_retrieval_viewにGETメソッドを送ったときにステータスコード401が返ってくる
+    """
+    test_user = create_default_user()
+    response = self.client.get(self.user_id_url,
+                                content_type=self.content_type,)
+    # ステータス401が返ってくる
+    self.assertEqual(response.status_code, 401)
