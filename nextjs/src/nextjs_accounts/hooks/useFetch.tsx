@@ -1,6 +1,8 @@
 import {  fetchLoginFlgReturnType, fetchParamsType, 
   signupParamsType, signupToFrontendServerReturnType,
-  loginParamsType, loginToFrontendServerReturnType } from './types/useFetch.d'
+  loginParamsType, loginToFrontendServerReturnType,
+  updateParamsType, updateToFrontendServerReturnType,
+  fetchUserIdReturnType } from './types/useFetch.d'
 
 export const fetchResponse = async( url:string, 
                                     params:fetchParamsType, 
@@ -92,9 +94,58 @@ export const useFetch = ()=> {
     }
   }
 
+  const updateToFrontendServer:updateToFrontendServerReturnType =async(data: updateParamsType, userId:number)=>{
+    /**
+     * フロントエンドサーバーにPOSTメソッドでリクエストを送る
+     * @return {httpStatus: number, statusText: string, data: {[key:string]: string[]}}
+    */
+    
+    // APIにリクエストを送る
+    try{
+      const response = await fetchResponse(
+        `${process.env.NEXT_PUBLIC_MY_ORIGIN}/api/update/${userId}`,
+        { method:'PATCH', headers: {}, credentials: 'include', },
+        data)
+      return await response.json()
+    } catch(error) {
+      console.error('Undefind Error:', error);
+      return { 
+        // 汎用的なエラーレスポンスを返す
+        httpStatus: 500,
+        statusText: 'Internal Server Error',
+        data: { message: '予期せぬエラーが発生しました' },
+      };
+    }
+  }
+
+  const fetchUserIdFromFrontendServer:fetchUserIdReturnType =async()=>{
+    /**
+     * フロントエンドサーバーにGETメソッドでリクエストを送る
+     * @return {httpStatus: number, statusText: string, data: {[key:string]: string[]}}
+    */
+    
+    // APIにリクエストを送る
+    try{
+      const response = await fetchResponse(
+        `${process.env.NEXT_PUBLIC_MY_ORIGIN}/api/users/me`,
+        { method:'GET', headers: {}, credentials: 'include', }
+      )
+      return await response.json()
+    } catch(error) {
+      console.error('Undefind Error:', error);
+      return { 
+        // 汎用的なエラーレスポンスを返す
+        httpStatus: 500,
+        statusText: 'Internal Server Error',
+        data: { userId:-1, message: '予期せぬエラーが発生しました' },
+      };
+    }
+  }
   return{
     fetchLoginFlgFromFrontendServer,
     signupToFrontendServer,
     loginToFrontendServer,
+    updateToFrontendServer,
+    fetchUserIdFromFrontendServer,
   }
 }

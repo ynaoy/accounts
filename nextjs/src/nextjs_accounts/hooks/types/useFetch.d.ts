@@ -29,6 +29,7 @@ export type signupToBackendServerReturnType = (params:signupParamsType)=>
   Promise<{ json:fetchReturnType,
             cookie?: string|null,
   }>
+
 export type loginParamsType = {
   email: string;
   password: string;
@@ -41,3 +42,21 @@ export type loginToBackendServerReturnType = (params:LoginParamsType)=>
   Promise<{ json:fetchReturnType,
             cookie?: string|null,
   }>
+
+export type updateParamsType = { 
+  username: string;
+  email: string;
+}
+
+export type updateToFrontendServerReturnType = (params: updateParamsType,userId: number)=>
+  Promise<fetchReturnType>
+  
+export type updateToBackendServerReturnType = (params: updateParamsType,userId: number)=>
+  Promise<{ json:fetchReturnType,
+            cookie?: string|null,
+  }>
+
+export type fetchUserIdReturnType = ()=>
+  Promise<{ httpStatus: number,
+            statusText: string,
+            data: { [key: string]: string, userId: number } }>
