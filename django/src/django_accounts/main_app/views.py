@@ -25,6 +25,26 @@ class IsLoginView(RetrieveAPIView):
                         content_type = "application/json")
     return response
     
+class JWTUserIDRetrievalView(RetrieveAPIView):
+  """
+  ユーザーID取得用ビュー 
+  """
+  permission_classes = (IsAuthenticated,)
+  queryset = User.objects.all()
+  serializer_class = UserSerializer
+
+  def get(self, request, format=None, *args, **kwargs):
+    try: 
+      if(request.user):
+        return Response({"userId": request.user.pk},
+                        status = status.HTTP_200_OK,
+                        content_type = "application/json")
+    # その他の予期せぬエラーが発生した場合
+    except Exception as e:
+      return Response({"userId": 1, "error": "予期せぬエラーが発生しました。"}, 
+                      status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
 class SignupView(CreateAPIView):
   """
   ユーザー登録用ビュー 
@@ -123,10 +143,28 @@ class UpdateView(UpdateAPIView):
   def get_serializer_context(self):
     context = super().get_serializer_context()
     context["custom_validators"] = {
-      "username": [username_unique_validator],
-      "email": [email_unique_validator]
+      "username": [self.username_unique_validator_with_login],
+      "email": [self.email_unique_validator_with_login]
     }
     return context
+  
+  def username_unique_validator_with_login(self,value):
+    """
+     ログイン中のユーザーのusernameと同じusernameが渡されたら、
+     バリデーションをスキップする(username_unique_validatorが通らないため)
+    """
+    if(self.request.user.username and self.request.user.username==value):
+      return value
+    return username_unique_validator(value)
+
+  def email_unique_validator_with_login(self,value):
+    """
+     ログイン中のユーザーのemailと同じemailが渡されたら、
+     バリデーションをスキップする(email_unique_validatorが通らないため)
+    """
+    if(self.request.user.email and self.request.user.email==value):
+      return value
+    return email_unique_validator(value)
   
   def patch(self, request, format=None, *args, **kwargs):
     try:
