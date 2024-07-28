@@ -402,6 +402,97 @@ class UpdateViewTests(TestCase):
     self.assertTrue(response.content.decode().find("[このユーザーネームは既に使用されています]"))
     self.assertTrue(response.content.decode().find("[このメールアドレスは既に使用されています]"))
 
+class DestroyViewTests(TestCase):
+
+  def setUp(self):
+    self.content_type = "application/json"
+
+  def test_destroy_view_with_valid_params_and_login(self):
+    """
+    ログイン時に適切なパラメータでdestroy_viewにDELETEメソッドを送ったときにステータスコード200が返ってきて、
+    ユーザーが削除されている
+    """
+    test_user = create_default_user()
+    headers = create_jwt_headers(test_user)
+    response = self.client.delete(reverse("main_app:destroy", args=[test_user.pk]),
+                                { "password": "password"},
+                                content_type=self.content_type,
+                                headers = headers)
+    # ステータス200が返ってくる
+    self.assertEqual(response.status_code, 200)
+    # ユーザーが削除されている
+    test_user = User.objects.filter(pk=test_user.pk) # 再度ユーザーオブジェクトを取得
+    self.assertFalse(test_user)
+
+  def test_destroy_view__with_valid_params_and_not_login(self):
+    """
+    非ログイン時に適切なパラメータでdestroy_viewにDELETEメソッドを送ったときに
+    ユーザーが削除されず、401エラーが返ってくる
+    """
+    test_user = create_default_user()
+    response = self.client.delete(reverse("main_app:destroy", args=[test_user.pk]),
+                                { "password": "password"},
+                                content_type=self.content_type)
+    # ステータス401が返ってくる
+    self.assertEqual(response.status_code, 401)
+    # ユーザーが削除されていない
+    test_user = User.objects.get(pk=test_user.pk) # 再度ユーザーオブジェクトを取得
+    self.assertTrue(test_user)
+
+  def test_destroy_view_with_not_my_path(self):
+    """
+    ログイン時に間違ったPKのパスにDELETEメソッドを送ったときに
+    ユーザーが削除されず、403エラーが返ってくる
+    """
+    test_user = create_default_user()
+    headers = create_jwt_headers(test_user)
+    another_user = create_default_user(username="another_user", email="anotheremail@example.com")
+    response = self.client.delete(reverse("main_app:destroy", args=[another_user.pk]),
+                                { "password": "password"},
+                                content_type=self.content_type,
+                                headers = headers)
+    # ステータス403が返ってくる
+    self.assertEqual(response.status_code, 403)
+    # ユーザーが削除されていない
+    test_user = User.objects.get(pk=test_user.pk) # 再度ユーザーオブジェクトを取得
+    self.assertTrue(test_user)
+
+  def test_destroy_view_patch_with_not_valid_pass(self):
+    """
+    ログイン時に誤ったpasswordをparamsに加えてdestroy_viewにDELETEメソッドを送ったときに
+    ユーザーが削除されず、401エラーが返ってくる
+    """
+    test_user = create_default_user()
+    headers = create_jwt_headers(test_user)
+    response = self.client.delete(reverse("main_app:destroy", args=[test_user.pk]),
+                                { "password": "falsepassword"},
+                                content_type=self.content_type,
+                                headers = headers)
+    # ステータス401が返ってくる
+    self.assertEqual(response.status_code, 401)
+    # ユーザーが削除されていない
+    test_user = User.objects.get(pk=test_user.pk) # 再度ユーザーオブジェクトを取得
+    self.assertTrue(test_user)
+    self.assertTrue(response.content.decode().find("[パスワードが間違っています]"))
+
+  def test_destroy_view_patch_with_empty_params(self):
+    """
+    ログイン時に必要なparamsが指定されていない場合に、destroy_viewにDELETEメソッドを送ったときに
+    ユーザーが削除されず、400エラーが返ってくる
+    """
+    test_user = create_default_user()
+    headers = create_jwt_headers(test_user)
+    response = self.client.delete(reverse("main_app:destroy", args=[test_user.pk]),
+                                {},
+                                content_type=self.content_type,
+                                headers = headers)
+    # ステータス400が返ってくる
+    self.assertEqual(response.status_code, 400)
+    # ユーザーが削除されていない
+    test_user = User.objects.get(pk=test_user.pk) # 再度ユーザーオブジェクトを取得
+    self.assertTrue(test_user)
+    self.assertTrue(response.content.decode().find("[パスワードは必須です]"))
+
 class JWTUserIDRetrievalViewTests(TestCase):
 
   def setUp(self):
