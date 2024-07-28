@@ -56,6 +56,18 @@ export type updateToBackendServerReturnType = (params: updateParamsType,userId: 
             cookie?: string|null,
   }>
 
+export type destroyParamsType = { 
+  password: string;
+}
+  
+export type destroyToFrontendServerReturnType = (params: destroyParamsType,userId: number)=>
+  Promise<fetchReturnType>
+  
+export type destroyToBackendServerReturnType = (params: destroyParamsType,userId: number)=>
+  Promise<{ json:fetchReturnType,
+            cookie?: string|null,
+  }>
+
 export type fetchUserIdReturnType = ()=>
   Promise<{ httpStatus: number,
             statusText: string,
