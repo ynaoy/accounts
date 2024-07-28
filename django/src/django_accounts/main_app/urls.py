@@ -4,7 +4,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView,
 )
-from .views import (IsLoginView, JWTUserIDRetrievalView, SignupView, LoginView, UpdateView)
+from .views import (IsLoginView, JWTUserIDRetrievalView, SignupView, LoginView, UpdateView, DestroyView,)
 
 app_name = "main_app"
 
@@ -17,4 +17,5 @@ urlpatterns = [
   path('signup/', SignupView.as_view(), name='signup'),
   path('login/', LoginView.as_view(), name='login'),
   path('update/<int:pk>', UpdateView.as_view(), name='update'),
+  path('destroy/<int:pk>', DestroyView.as_view(), name='destroy'),
 ]
