@@ -71,7 +71,6 @@ class SignupView(CreateAPIView):
       if serializer.is_valid(valid_fields=self.valid_fields):
         # ユーザー作成
         user = serializer.save()  # UserSerializerのcreateメソッドを呼び出す
-
         # JWTを発行してクッキーにセットする。そのレスポンスを返す
         response = Response(serializer.validated_data, status=status.HTTP_201_CREATED)
         response = get_jwt_and_set_cookie(user, response)
@@ -185,6 +184,43 @@ class UpdateView(UpdateAPIView):
         # バリデーションの理由によってHTTPステータスを管理
         http_status = status.HTTP_409_CONFLICT if validation_code_1d.count("unique") else status.HTTP_400_BAD_REQUEST
         return Response(serializer.errors, status=http_status)
+    
+    # その他の予期せぬエラーが発生した場合
+    except Exception as e:
+      return Response({"error": "予期せぬエラーが発生しました。"}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+    
+class DestroyView(DestroyAPIView):
+  """
+  ユーザー削除用ビュー  
+  """
+  permission_classes = (IsAuthenticated, OnlyYouPerm,)
+  queryset = User.objects.all()
+  serializer_class = UserSerializer
+  valid_fields = ("password",)
+  required_fields = ("password",)
+
+  def get_serializer_context(self):
+    context = super().get_serializer_context()
+    context["required_fields"] = { field: True for field in self.required_fields }
+    return context
+  
+  def delete(self, request, format=None, *args, **kwargs):
+    try:
+      serializer = self.serializer_class(data=request.data, context=self.get_serializer_context(), instance=request.user)
+      # バリデーションチェック
+      if serializer.is_valid(valid_fields=self.valid_fields):
+        password = serializer.validated_data["password"]
+        if check_password(password, serializer.instance.password): 
+          # ユーザー削除
+          user = serializer.instance.delete()
+          # レスポンスを返す
+          response = Response(serializer.validated_data, status=status.HTTP_200_OK)
+          return response
+        else:
+          return Response({"password": ["パスワードが間違っています"]}, status=status.HTTP_401_UNAUTHORIZED)
+      # バリデーションエラーの場合
+      else: 
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     # その他の予期せぬエラーが発生した場合
     except Exception as e:
