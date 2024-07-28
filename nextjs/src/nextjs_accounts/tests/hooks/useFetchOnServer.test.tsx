@@ -202,6 +202,50 @@ describe('useFetchOnServer', () => {
     })
   })
 
+  test('destroyToBackendServerでリクエストに成功した際に、適切なオブジェクトが返されている', async () => {
+    // fetchのモック
+    global.fetch = jest.fn().mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        json: () => Promise.resolve({ message: 'Success' }),
+        headers: { get: (key:string)=>'myCookie' }
+      })
+    );
+    // useFetchOnServerの初期化
+    const { result } = renderHook(() => useFetchOnServer());
+
+    // destroyToBackendServerを実行して結果をテスト
+    let response = await result.current.destroyToBackendServer({password:'password'}, 1)
+    expect(response).toEqual({
+      json:{ httpStatus: 200, statusText: 'OK', data: { message: 'Success' } },
+      cookie: 'myCookie'
+    })
+  })
+  
+  test('destroyToBackendServerでリクエストに失敗した際に、適切なオブジェクトが返されている', async () => {
+    // fetchのモック
+    global.fetch = jest.fn().mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: false,
+        status: 500,
+        statusText: 'Internal Server Error',
+      })
+    )
+    // useFetchOnServerの初期化
+    const { result } = renderHook(() => useFetchOnServer())
+
+    // destroyToBackendServerを実行して結果をテスト
+    let response = await result.current.destroyToBackendServer({password: '' }, 1)
+    expect(response).toEqual({ 
+      json:{ httpStatus: 500, 
+             statusText: 'Internal Server Error', 
+             data: { message: '予期せぬエラーが発生しました' }},
+      cookie: null
+    })
+  })
+
   test('fetchUserIdFromBackendServerでリクエストに成功した際に、適切なオブジェクトが返されている', async () => {
     // fetchのモック
     global.fetch = jest.fn().mockImplementationOnce(() =>
