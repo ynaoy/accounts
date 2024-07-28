@@ -3,6 +3,7 @@ import {  fetchLoginFlgReturnType, fetchParamsType,
   signupParamsType, signupToBackendServerReturnType,
   loginParamsType, loginToBackendServerReturnType,
   updateParamsType, updateToBackendServerReturnType,
+  destroyParamsType, destroyToBackendServerReturnType,
   fetchUserIdReturnType } from './types/useFetch.d'
 import { cookies } from 'next/headers'
 import { fetchResponse } from './useFetch'
@@ -170,6 +171,41 @@ export const useFetchOnServer = ()=> {
     }
   }
 
+  const destroyToBackendServer:destroyToBackendServerReturnType =async(data: destroyParamsType, userId: number)=>{
+    /**
+     * バックエンドサーバーにPOSTメソッドでリクエストを送る
+     * @return {httpStatus: number, statusText: string, data: {[key:string]: string[]}}
+    */
+    
+    // APIにリクエストを送る
+    try{
+      const response = await fetchResponseWithAuth(
+      `${process.env.NEXT_PUBLIC_API_ORIGIN}/api/destroy/${userId}`,
+      { method:'DELETE', headers: {}, credentials: 'include', },
+      data)
+      // クッキーの取得
+      const cookie = response.headers.get('set-cookie');
+      // jsonを解凍 
+      let ret = await response.json()
+      // jsonオブジェクトとクッキーをリターン
+      return {
+        json:{httpStatus: response.status,
+              statusText: response.statusText,
+              data: ret},
+        cookie: cookie
+      }
+    } catch(error) {
+      console.error('Undefind Error:', error);
+      return { 
+        // 汎用的なエラーレスポンスを返す
+        json: { httpStatus: 500,
+                statusText: 'Internal Server Error',
+                data: { message: '予期せぬエラーが発生しました' }},
+        cookie: null
+      };
+    }
+  }
+
   const fetchUserIdFromBackendServer:fetchUserIdReturnType =async()=>{
     /**
      * バックエンドサーバーにGETメソッドでリクエストを送る
@@ -202,6 +238,7 @@ export const useFetchOnServer = ()=> {
     signupToBackendServer,
     loginToBackendServer,
     updateToBackendServer,
+    destroyToBackendServer,
     fetchUserIdFromBackendServer
   }
 }
