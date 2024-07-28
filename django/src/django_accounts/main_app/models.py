@@ -36,16 +36,16 @@ class UserManager(BaseUserManager):
             **extra_fields,
         )
     
-    def update_user(self, fields):
+    def update_user(self, user, fields):
         for key, value in fields.items():
             if(key=="password"):
-                self.set_password(value)
+                user.set_password(value)
             else:
                 if(key=="email") : 
                     value = self.normalize_email(value)
-                setattr(self, key, value)
-        self.save(using=self._db)
-        return self
+                setattr(user, key, value)
+        user.save(using=self._db)
+        return user
 
 class User(AbstractBaseUser, PermissionsMixin):
 
