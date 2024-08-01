@@ -68,6 +68,9 @@ export type destroyToBackendServerReturnType = (params: destroyParamsType,userId
             cookie?: string|null,
   }>
 
+export type logoutToFrontendServerReturnType = ()=>
+  Promise<fetchReturnType>
+
 export type fetchUserIdReturnType = ()=>
   Promise<{ httpStatus: number,
             statusText: string,
