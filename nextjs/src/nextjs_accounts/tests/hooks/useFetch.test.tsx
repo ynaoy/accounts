@@ -210,6 +210,46 @@ describe('useFetch', () => {
                                data: { message: '予期せぬエラーが発生しました' }})
   })
 
+  test('logoutToFrontendServerでリクエストに成功した際に、適切なオブジェクトが返されている', async () => {
+    // fetchのモック
+    global.fetch = jest.fn().mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        json: () => Promise.resolve({
+          httpStatus: 200, 
+          statusText: 'OK', 
+          data: { message: 'Success' }}),
+      })
+    );
+    // useFetchの初期化
+    const { result } = renderHook(() => useFetch());
+
+    // destroyToFrontendServerを実行して結果をテスト
+    let response = await result.current.logoutToFrontendServer()
+    expect(response).toEqual({ httpStatus: 200, statusText: 'OK', data: { message: 'Success' } })
+  })
+
+  test('logoutToFrontendServerでリクエストに失敗した際に、適切なオブジェクトが返されている', async () => {
+    // fetchのモック
+    global.fetch = jest.fn().mockImplementationOnce(() =>
+      Promise.resolve({
+        ok: false,
+        status: 500,
+        statusText: 'Internal Server Error',
+      })
+    )
+    // useFetchの初期化
+    const { result } = renderHook(() => useFetch())
+
+    // updateToFrontendServerを実行して結果をテスト
+    let response = await result.current.logoutToFrontendServer()
+    expect(response).toEqual({ httpStatus: 500, 
+                               statusText: 'Internal Server Error', 
+                               data: { message: '予期せぬエラーが発生しました' }})
+  })
+
   test('fetchUserIdFromFrontendServerでリクエストに成功した際に、適切なオブジェクトが返されている', async () => {
     // fetchのモック
     global.fetch = jest.fn().mockImplementationOnce(() =>
