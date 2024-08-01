@@ -3,7 +3,7 @@ import {  fetchLoginFlgReturnType, fetchParamsType,
   loginParamsType, loginToFrontendServerReturnType,
   updateParamsType, updateToFrontendServerReturnType,
   destroyParamsType, destroyToFrontendServerReturnType,
-  fetchUserIdReturnType } from './types/useFetch.d'
+  logoutToFrontendServerReturnType, fetchUserIdReturnType } from './types/useFetch.d'
 
 export const fetchResponse = async( url:string, 
                                     params:fetchParamsType, 
@@ -97,7 +97,7 @@ export const useFetch = ()=> {
 
   const updateToFrontendServer:updateToFrontendServerReturnType =async(data: updateParamsType, userId:number)=>{
     /**
-     * フロントエンドサーバーにPOSTメソッドでリクエストを送る
+     * フロントエンドサーバーにPATCHメソッドでリクエストを送る
      * @return {httpStatus: number, statusText: string, data: {[key:string]: string[]}}
     */
     
@@ -121,7 +121,7 @@ export const useFetch = ()=> {
 
   const destroyToFrontendServer:destroyToFrontendServerReturnType =async(data: destroyParamsType, userId:number)=>{
     /**
-     * フロントエンドサーバーにPOSTメソッドでリクエストを送る
+     * フロントエンドサーバーにDELETEメソッドでリクエストを送る
      * @return {httpStatus: number, statusText: string, data: {[key:string]: string[]}}
     */
     
@@ -131,6 +131,30 @@ export const useFetch = ()=> {
         `${process.env.NEXT_PUBLIC_MY_ORIGIN}/api/destroy/${userId}`,
         { method:'DELETE', headers: {}, credentials: 'include', },
         data)
+      return await response.json()
+    } catch(error) {
+      console.error('Undefind Error:', error);
+      return { 
+        // 汎用的なエラーレスポンスを返す
+        httpStatus: 500,
+        statusText: 'Internal Server Error',
+        data: { message: '予期せぬエラーが発生しました' },
+      };
+    }
+  }
+
+  const logoutToFrontendServer:logoutToFrontendServerReturnType =async()=>{
+    /**
+     * フロントエンドサーバーにDELETEメソッドでリクエストを送る
+     * @return {httpStatus: number, statusText: string, data: {[key:string]: string[]}}
+    */
+    
+    // APIにリクエストを送る
+    try{
+      const response = await fetchResponse(
+        `${process.env.NEXT_PUBLIC_MY_ORIGIN}/api/logout`,
+        { method:'DELETE', headers: {}, credentials: 'include', }
+      )
       return await response.json()
     } catch(error) {
       console.error('Undefind Error:', error);
@@ -172,6 +196,7 @@ export const useFetch = ()=> {
     loginToFrontendServer,
     updateToFrontendServer,
     destroyToFrontendServer,
+    logoutToFrontendServer,
     fetchUserIdFromFrontendServer,
   }
 }
