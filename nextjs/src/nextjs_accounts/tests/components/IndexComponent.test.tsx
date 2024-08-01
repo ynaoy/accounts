@@ -23,9 +23,19 @@ jest.mock("../../hooks/LoginFlgContext",
   })
 )
 
+const logoutToFrontendServerMock = jest.fn().mockResolvedValue({ httpStatus: 200, statusText: "" })
+//APIと通信するモジュールのモック
+jest.mock("../../hooks/useFetch",
+  ()=>({...jest.requireActual("../../hooks/useFetch"),
+    useFetch: ()=>{
+      return { logoutToFrontendServer : async()=>logoutToFrontendServerMock() }
+    }
+  })
+)
+
 describe("IndexComponent", ()=>{
   afterEach(() => {
-    // モックのリセット
+    //モックのリセット
     jest.clearAllMocks()
     loginFlgMock = false
   });
@@ -45,7 +55,7 @@ describe("IndexComponent", ()=>{
     //サブミットボタンをクリック
     await user.click(button)
     
-    // router.pushメソッドが呼び出されている
+    //router.pushメソッドが呼び出されている
     expect(routerPushMock).toHaveBeenCalled()
   });
 
@@ -63,7 +73,7 @@ describe("IndexComponent", ()=>{
     //サブミットボタンをクリック
     await user.click(button)
     
-    // router.pushメソッドが呼び出されている
+    //router.pushメソッドが呼び出されている
     expect(routerPushMock).toHaveBeenCalled()
   });
 
@@ -82,7 +92,7 @@ describe("IndexComponent", ()=>{
     //サブミットボタンをクリック
     await user.click(button)
     
-    // router.pushメソッドが呼び出されている
+    //router.pushメソッドが呼び出されている
     expect(routerPushMock).toHaveBeenCalled()
   });
 
@@ -101,12 +111,12 @@ describe("IndexComponent", ()=>{
     //サブミットボタンをクリック
     await user.click(button)
     
-    // router.pushメソッドが呼び出されている
+    //router.pushメソッドが呼び出されている
     expect(routerPushMock).toHaveBeenCalled()
   });
 
   //ログアウト機能がまだ未実装なのでスキップ
-  test.skip(`ログイン時にログアウトボタンが存在し、クリックイベントでリダイレクトが起こる`, async() => {
+  test(`ログイン時にログアウトボタンが存在し、クリックイベントでリダイレクトが起こる`, async() => {
     // ログイン状態でレンダー
     loginFlgMock = true
     render(<IndexComponent/>);
@@ -117,11 +127,11 @@ describe("IndexComponent", ()=>{
     //ユーザー更新ボタンが存在する
     const button = screen.getByRole("button", {name: "ログアウト"})
     expect(button).toBeTruthy()
-
     //サブミットボタンをクリック
     await user.click(button)
-    
-    // router.pushメソッドが呼び出されている
+    //APIと通信する関数が呼び出されている
+    expect(logoutToFrontendServerMock).toHaveBeenCalled()
+    //router.pushメソッドが呼び出されている
     expect(routerPushMock).toHaveBeenCalled()
   });
 })
